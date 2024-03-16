@@ -8,16 +8,21 @@ datasource db {
 }
 
 model users {
-  id           Int           @id @default(autoincrement())
-  firstName    String        @db.VarChar(30)
-  lastName     String        @db.VarChar(30)
-  username     String        @unique @db.VarChar(50)
-  email        String        @unique @db.VarChar(255)
-  password     String        @db.VarChar(255)
-  stockTrades  stockTrades[]
-  stocks       stocks[]
-  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
-  lastModified DateTime      @updatedAt @db.Timestamptz(6)
+  id                            Int           @id @default(autoincrement())
+  firstName                     String        @db.VarChar(30)
+  lastName                      String        @db.VarChar(30)
+  username                      String        @unique @db.VarChar(50)
+  email                         String        @unique @db.VarChar(255)
+  password                      String        @db.VarChar(255)
+  isVerified                    Boolean       @default(false)
+  forgotPasswordToken           String?
+  forgotPasswordTokenExpiration DateTime?
+  verifyToken                   String?
+  verifyTokenExpiration         DateTime?
+  stockTrades                   stockTrades[]
+  stocks                        stocks[]
+  createdAt                     DateTime      @default(now()) @db.Timestamptz(6)
+  lastModified                  DateTime      @updatedAt @db.Timestamptz(6)
 }
 
 enum TradeType {
