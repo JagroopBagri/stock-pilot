@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id           Int           @id @default(autoincrement())
+  firstName    String        @db.VarChar(30)
+  lastName     String        @db.VarChar(30)
+  username     String        @unique @db.VarChar(50)
+  email        String        @unique @db.VarChar(255)
+  password     String        @db.VarChar(255)
+  stockTrades  stockTrades[]
+  stocks       stocks[]
+  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+  lastModified DateTime      @updatedAt @db.Timestamptz(6)
+}
+
+enum TradeType {
+  sale
+  purchase
+}
+
+model stockTrades {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  user           users     @relation(fields: [userId], references: [id])
+  symbol         String    @db.VarChar(20)
+  type           TradeType
+  pricePerStock  Decimal   @db.Decimal(10, 2)
+  totalPrice     Decimal   @db.Decimal(12, 2)
+  quantity       Int
+  dateOfTrade    DateTime
+  notes          String?   @db.VarChar(255)
+  purchaseStocks stocks[]  @relation("PurchaseTrade")
+  saleStocks     stocks[]  @relation("SaleTrade")
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6)
+  lastModified   DateTime  @updatedAt @db.Timestamptz(6)
+}
+
+model stocks {
+  id              Int          @id @default(autoincrement())
+  userId          Int
+  user            users        @relation(fields: [userId], references: [id])
+  symbol          String       @db.VarChar(20)
+  purchasePrice   Decimal      @db.Decimal(10, 2)
+  sellPrice       Decimal?     @db.Decimal(10, 2)
+  dateOfPurchase  DateTime
+  dateOfSale      DateTime?
+  purchaseTradeId Int
+  saleTradeId     Int?
+  purchaseTrade   stockTrades  @relation("PurchaseTrade", fields: [purchaseTradeId], references: [id])
+  saleTrade       stockTrades? @relation("SaleTrade", fields: [saleTradeId], references: [id])
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  lastModified    DateTime     @updatedAt @db.Timestamptz(6)
+}
