@@ -38,7 +38,7 @@ const Page = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("/api/sign-up", user);
+      const response = await axios.post("/api/v1/sign-up", user);
       if (response.status === 201) {
         router.push("/login");
       }
