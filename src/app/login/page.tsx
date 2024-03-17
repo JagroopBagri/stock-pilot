@@ -27,7 +27,7 @@ const Page = () => {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await axios.post("/api/login", user);
+      const response = await axios.post("/api/v1/login", user);
       if (response.status === 200) {
         router.push("/profile");
       }
