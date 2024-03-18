@@ -1,24 +1,49 @@
 import { NextResponse, NextRequest } from "next/server";
+import { verifyAuth } from "./lib/auth";
+
+const PUBLIC_FILE = /\.(.*)$/;
 
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-  // there are some public paths and there are some protected paths
-  // the public path should not be visible when the user has the token
-  // the private path should not be visible when the user doesn't have the token
-  const path = request.nextUrl.pathname;
-  const isPublicPath = path === "/login" || path === "/sign-up";
-  const token = request.cookies.get("token")?.value || ""; // check if the token exists
-  if (isPublicPath && token.length > 0) {
-    // redirect them to their profile page
-    return NextResponse.redirect(new URL("/profile", request.nextUrl));
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const url = req.url;
+  if (
+    pathname.startsWith("/_next") || // exclude Next.js internals
+    pathname.startsWith("/static") || // exclude static files
+    pathname.startsWith("/api/v1/crons") ||
+    pathname.startsWith("/api/v1/users/sign-up") ||
+    pathname.startsWith("/api/v1/users/login") ||
+    pathname.startsWith("/api/v1/users/logout") ||
+    url.includes("/static") ||
+    url.includes("/_next") ||
+    PUBLIC_FILE.test(pathname) // exclude all files in the public folder
+  ) {
+    return NextResponse.next();
   }
-  if (!isPublicPath && !token.length) {
-    // redirect them to the login page
-    return NextResponse.redirect(new URL("/login", request.nextUrl));
+  console.log("running middleware");
+
+  const token = req.cookies.get("user-token")?.value || "";
+  const validationResp = await verifyAuth(token);
+  const verifiedToken = validationResp.success;
+
+  if ((url.includes("/login") || url.includes("/sign-up")) && verifiedToken) {
+    return NextResponse.redirect(new URL("/dashboard", url));
   }
+
+  if (!verifiedToken && !url.includes("/login") && !url.includes("/sign-up")) {
+    return NextResponse.redirect(new URL("/login", url));
+  }
+
+  return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/", "/profile", "/login", "/sign-up"],
+  matcher: [
+    "/",
+    "/api/v1/:path*",
+    "/login",
+    "/sign-up",
+    "/my-profile",
+    "/dashboard",
+  ],
 };
