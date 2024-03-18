@@ -8,7 +8,7 @@ import { PropagateLoader } from "react-spinners";
 const Page = () => {
   const router = useRouter();
   const [user, setUser] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -16,7 +16,7 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user.email.length > 0 && user.password.length > 0) {
+    if (user.username.length > 0 && user.password.length > 0) {
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
@@ -27,7 +27,7 @@ const Page = () => {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await axios.post("/api/v1/login", user);
+      const response = await axios.post("/api/v1/users/login", user);
       if (response.status === 200) {
         router.push("/profile");
       }
@@ -45,16 +45,16 @@ const Page = () => {
       }
     >
       <h1 className={"text-2xl my-16"}>Login</h1>
-      <label htmlFor={"email"}>Email</label>
+      <label htmlFor={"username"}>Username</label>
       <input
         className={
           "text-black my-4 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
         }
         type={"text"}
-        id={"email"}
-        placeholder={"Email"}
-        value={user.email}
-        onChange={(e) => setUser({ ...user, email: e.target.value })}
+        id={"username"}
+        placeholder={"Username"}
+        value={user.username}
+        onChange={(e) => setUser({ ...user, username: e.target.value })}
       />
 
       <label htmlFor={"password"}>Password</label>
