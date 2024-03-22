@@ -24,20 +24,19 @@ export const verifyAuth = async (token: string): Promise<VerifyAuthResp> => {
 
     const decoded = payload as UserJWTPayload;
 
-    if (!decoded.id) {
-      return {
-        message: "Your token has expired or is invalid.",
-        success: false,
-        id: -1,
-      };
-    }
-
     return {
       message: "Successfully validated",
       success: true,
       id: decoded.id,
     };
   } catch (error: any) {
+    if(error.code === 'ERR_JWS_INVALID'){
+      return {
+        message: error.message || "Your token has expired or is invalid.",
+        success: false,
+        id: -1,
+      };
+    }
     console.error("Error in validating token: ", error);
     return {
       message: error.message || "Error in validating token",

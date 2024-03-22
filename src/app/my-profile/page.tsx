@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 export default function ProfilePage() {
   const router = useRouter();
   const [data, setData] = useState("nothing");
+
   const logout = async () => {
     try {
       await axios.get("/api/v1/users/logout");
@@ -20,15 +21,10 @@ export default function ProfilePage() {
   };
 
   const getUserDetails = async () => {
-    const res = await axios.get("/api/v1/users/me");
+    const res = await axios.get("/api/v1/users/profile");
     console.log(res.data);
     setData(res.data.data._id);
   };
-  const getDetails = async () => {
-    const res = await axios.get("/api/v1/users/profile");
-    console.log("res is", res);
-  }
-  getDetails();
 
 
   return (

@@ -4,26 +4,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PropagateLoader } from "react-spinners";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 
-const Page = () => {
+const defaultUserState = { username: "", password: "" };
+
+export default function LoginPage() {
   const router = useRouter();
-  const [user, setUser] = useState({
-    username: "",
-    password: "",
-  });
+  const [user, setUser] = useState(defaultUserState);
+  const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState<boolean>(false);
 
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (user.username.length > 0 && user.password.length > 0) {
-      setButtonDisabled(false);
-    } else {
-      setButtonDisabled(true);
-    }
-  }, [user]);
-
-  const onSubmit = async (e:any) => {
+  // on login submit
+  const onSubmit = async (e: any) => {
     setLoading(true);
     e.preventDefault();
     try {
@@ -38,7 +31,24 @@ const Page = () => {
     }
   };
 
+  // Function to handle the submit action inside the modal
+  const onForgotPasswordSubmit = async (email: string) => {
+    // Implement the API call or logic here to handle the forgot password action
+    console.log(email);
+    setShowForgotPasswordModal(false); // Close the modal after submission
+  };
+
+  useEffect(() => {
+    if (user.username.length > 0 && user.password.length > 0) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
+
   return (
+    <>
+    <ForgotPasswordModal isOpen={showForgotPasswordModal} setIsOpen={setShowForgotPasswordModal}/>
     <div
       className={
         "flex flex-col items-center justify-center h-screen p-5 w-full"
@@ -77,11 +87,14 @@ const Page = () => {
       >
         {loading ? <PropagateLoader /> : "Login"}
       </button>
-      <Link className={"text-sm my-2"} href={"/sign-up"}>
+      <Link className={"text-sm mt-6"} href={"/sign-up"}>
         {"Don't have an account? Sign Up"}
       </Link>
+      <button className="text-sm mt-4" onClick={() => setShowForgotPasswordModal(true)}>
+        Forgot your password?
+      </button>
     </div>
+    </>
   );
 };
 
-export default Page;

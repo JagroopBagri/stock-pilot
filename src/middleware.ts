@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { verifyAuth } from "./lib/auth";
+import { verifyAuth } from "./utils/server/auth";
 
 const PUBLIC_FILE = /\.(.*)$/;
 
@@ -9,13 +9,13 @@ export async function middleware(req: NextRequest) {
   const url = req.url;
   if (
     pathname.startsWith("/_next") || // exclude Next.js internals
-    pathname.startsWith("/static") || // exclude static files
-    pathname.startsWith("/api/v1/crons") ||
-    pathname.startsWith("/api/v1/users/sign-up") ||
-    pathname.startsWith("/api/v1/users/login") ||
-    pathname.startsWith("/api/v1/users/logout") ||
-    url.includes("/static") ||
     url.includes("/_next") ||
+    pathname.startsWith("/static") || // exclude static files
+    url.includes("/static") ||
+    pathname.startsWith("/api/v1/crons") || // exclude crons
+    pathname.startsWith("/api/v1/users/sign-up") || // exclude sign up route
+    pathname.startsWith("/api/v1/users/login") || //exclude login route
+    pathname.startsWith("/api/v1/users/logout") || // exclude logout route
     PUBLIC_FILE.test(pathname) // exclude all files in the public folder
   ) {
     return NextResponse.next();
