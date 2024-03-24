@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PropagateLoader } from "react-spinners";
-import ForgotPasswordModal from "@/components/ForgotPasswordModal";
+
+
 
 const defaultUserState = { username: "", password: "" };
 
@@ -48,7 +49,6 @@ export default function LoginPage() {
 
   return (
     <>
-    <ForgotPasswordModal isOpen={showForgotPasswordModal} setIsOpen={setShowForgotPasswordModal}/>
     <div
       className={
         "flex flex-col items-center justify-center h-screen p-5 w-full"
