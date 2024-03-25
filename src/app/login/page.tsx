@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PropagateLoader } from "react-spinners";
+import ToggleTheme from "@/components/toggleTheme";
 
 const defaultUserState = { username: "", password: "" };
 
@@ -55,6 +56,7 @@ export default function LoginPage() {
   return (
     <>
       <div className={"flex flex-col items-center h-screen p-5 w-full mt-52"}>
+        <ToggleTheme></ToggleTheme>
         <h1 className={"text-8xl mb-20"}>Stock Pilot</h1>
         <input
           className="input input-bordered w-full max-w-xs mb-6"
@@ -80,9 +82,9 @@ export default function LoginPage() {
           {"Don't have an account? Sign Up"}
         </Link>
 
-        <button className="link-primary" onClick={toggleForgotPasswordModal}>
+        <p className="link-primary cursor-pointer" onClick={toggleForgotPasswordModal}>
           Forgot your password?
-        </button>
+        </p>
         <dialog id="forgot_password_modal" className="modal" ref={fpModalRef}>
           <div className="modal-box">
             <form
@@ -102,9 +104,10 @@ export default function LoginPage() {
               >
                 ✕
               </button>
-              <h2 className="font-bold text-lg text-center mb-6">
+              <h2 className="font-bold text-2xl text-center mb-6">
                 Recover your account
               </h2>
+              <p className="mb-6">Please enter your email below</p>
               <input
                 className="input input-bordered w-full max-w-xs mb-6"
                 type="email"
