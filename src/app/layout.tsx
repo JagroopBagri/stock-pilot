@@ -1,4 +1,3 @@
-import Head from "next/head";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css"
@@ -17,9 +16,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="cmyk">
-      <Head>
-        <title>{`${metadata.title || ""}`}</title>
-        <meta name="description" content={metadata.description || ""} />
         <link
           rel="icon"
           href="/icon.png"
@@ -32,7 +28,6 @@ export default function RootLayout({
           type="image/<generated>"
           sizes="<generated>"
         />
-      </Head>
       <body className={inter.className}>
         {children}
       </body>

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PropagateLoader } from "react-spinners";
-import ToggleTheme from "@/components/toggleTheme";
+import ToggleTheme from "@/components/ToggleTheme";
 
 const defaultUserState = { username: "", password: "" };
 
