@@ -1,10 +1,11 @@
 "use client";
-import { useState, useRef, useEffect  } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PropagateLoader } from "react-spinners";
 import ToggleTheme from "@/components/ToggleTheme";
+import toast from "react-hot-toast";
 
 const defaultUserState = { username: "", password: "" };
 
@@ -25,8 +26,8 @@ export default function LoginPage() {
       if (response.status === 200) {
         router.push("/my-profile");
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error(error?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -34,20 +35,32 @@ export default function LoginPage() {
 
   // Function to handle the submit action inside the modal
   const onForgotPasswordSubmit = async (email: string) => {
-    // Implement the API call or logic here to handle the forgot password action
-    console.log(email);
+    try {
+      await axios.post("/api/v1/users/forgot-password", { email });
+      setFPModalOpen(false);
+      setForgotEmail("");
+      toast.success(
+        "Reset password email has been sent! Please check your email!"
+      );
+    } catch (error: any) {
+      toast.error("Error: Could not send reset password email");
+      console.error(error?.response?.data);
+    }
   };
 
   // This function is used to open the forgot password modal
   const toggleForgotPasswordModal = () => {
-      setFPModalOpen(!fpModalOpen);
+    setFPModalOpen(!fpModalOpen);
   };
 
   useEffect(() => {
     if (fpModalOpen) {
       fpModalRef.current !== null && fpModalRef.current.showModal();
     } else {
-      if (fpModalRef.current && typeof fpModalRef.current.close === 'function') {
+      if (
+        fpModalRef.current &&
+        typeof fpModalRef.current.close === "function"
+      ) {
         fpModalRef.current.close();
       }
     }
@@ -82,7 +95,10 @@ export default function LoginPage() {
           {"Don't have an account? Sign Up"}
         </Link>
 
-        <p className="link-primary cursor-pointer" onClick={toggleForgotPasswordModal}>
+        <p
+          className="link-primary cursor-pointer"
+          onClick={toggleForgotPasswordModal}
+        >
           Forgot your password?
         </p>
         <dialog id="forgot_password_modal" className="modal" ref={fpModalRef}>

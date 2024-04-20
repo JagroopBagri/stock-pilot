@@ -42,8 +42,8 @@ const Page = () => {
       if (response.status === 201) {
         router.push("/login");
       }
-    } catch (error) {
-      console.log("error", error);
+    } catch (error: any) {
+      console.error(error?.response?.data);
     } finally {
       setLoading(false);
     }

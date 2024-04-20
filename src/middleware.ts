@@ -16,6 +16,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api/v1/users/sign-up") || // exclude sign up route
     pathname.startsWith("/api/v1/users/login") || //exclude login route
     pathname.startsWith("/api/v1/users/logout") || // exclude logout route
+    pathname.startsWith("/api/v1/users/forgot-password") || // exclude forgot-password route
     PUBLIC_FILE.test(pathname) // exclude all files in the public folder
   ) {
     return NextResponse.next();
