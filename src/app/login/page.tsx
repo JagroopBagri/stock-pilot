@@ -23,7 +23,7 @@ export default function LoginPage() {
     try {
       const response = await axios.post("/api/v1/users/login", user);
       if (response.status === 200) {
-        router.push("/profile");
+        router.push("/my-profile");
       }
     } catch (error) {
       console.log(error);
