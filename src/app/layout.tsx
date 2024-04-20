@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Providers } from "./providers";
-import "./globals.css";
+import "../styles/globals.css";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,12 +16,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="cmyk">
+      <link
+        rel="icon"
+        href="/icon.png"
+        type="image/<generated>"
+        sizes="<generated>"
+      />
+      <link
+        rel="apple-touch-icon"
+        href="/apple-icon.png"
+        type="image/<generated>"
+        sizes="<generated>"
+      />
       <body className={inter.className}>
-        <Providers>
         {children}
-        </Providers>
-        </body>
+        <Toaster
+          position="bottom-left"
+          toastOptions={{
+            className: "react-hot-toast",
+            duration: 5000,
+          }}
+        />
+      </body>
     </html>
   );
 }

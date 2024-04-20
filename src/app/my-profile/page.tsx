@@ -8,27 +8,22 @@ import { useRouter } from "next/navigation";
 export default function ProfilePage() {
   const router = useRouter();
   const [data, setData] = useState("nothing");
+
   const logout = async () => {
     try {
       await axios.get("/api/v1/users/logout");
-      toast.success("Logout successful");
       router.push("/login");
     } catch (error: any) {
-      console.log(error.message);
-      toast.error(error.message);
+      console.error(error?.response?.data);
+      toast.error("Error occurred while attempting to logout");
     }
   };
 
   const getUserDetails = async () => {
-    const res = await axios.get("/api/v1/users/me");
+    const res = await axios.get("/api/v1/users/profile");
     console.log(res.data);
     setData(res.data.data._id);
   };
-  const getDetails = async () => {
-    const res = await axios.get("/api/v1/users/profile");
-    console.log("res is", res);
-  }
-  getDetails();
 
 
   return (
@@ -40,7 +35,7 @@ export default function ProfilePage() {
         {data === "nothing" ? (
           "Nothing"
         ) : (
-          <Link href={`/profile/${data}`}>{data}</Link>
+          <Link href={`/my-profile/${data}`}>{data}</Link>
         )}
       </h2>
       <hr />

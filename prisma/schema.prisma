@@ -16,9 +16,6 @@ model users {
   password                      String        @db.VarChar(255)
   isVerified                    Boolean       @default(false)
   forgotPasswordToken           String?
-  forgotPasswordTokenExpiration DateTime?
-  verifyToken                   String?
-  verifyTokenExpiration         DateTime?
   stockTrades                   stockTrades[]
   stocks                        stocks[]
   createdAt                     DateTime      @default(now()) @db.Timestamptz(6)
