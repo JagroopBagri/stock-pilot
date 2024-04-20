@@ -37,7 +37,7 @@ export const verifyAuth = async (token: string): Promise<VerifyAuthResp> => {
         id: -1,
       };
     }
-    console.error("Error in validating token: ", error);
+    console.error("Invalid token - verifyAuth");
     return {
       message: error.message || "Error in validating token",
       success: false,

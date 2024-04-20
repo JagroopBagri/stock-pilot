@@ -28,6 +28,7 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       console.error(error?.response?.data);
+      toast.error("Error: Invalid Credentials");
     } finally {
       setLoading(false);
     }
@@ -35,6 +36,7 @@ export default function LoginPage() {
 
   // Function to handle the submit action inside the modal
   const onForgotPasswordSubmit = async (email: string) => {
+    setLoading(true);
     try {
       await axios.post("/api/v1/users/forgot-password", { email });
       setFPModalOpen(false);
@@ -46,6 +48,7 @@ export default function LoginPage() {
       toast.error("Error: Could not send reset password email");
       console.error(error?.response?.data);
     }
+    setLoading(false);
   };
 
   // This function is used to open the forgot password modal
