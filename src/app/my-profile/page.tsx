@@ -11,7 +11,7 @@ export default function ProfilePage() {
 
   const logout = async () => {
     try {
-      await axios.get("/api/v1/users/logout");
+      await axios.get("/api/v1/user/logout");
       router.push("/login");
     } catch (error: any) {
       console.error(error?.response?.data);
@@ -20,7 +20,7 @@ export default function ProfilePage() {
   };
 
   const getUserDetails = async () => {
-    const res = await axios.get("/api/v1/users/profile");
+    const res = await axios.get("/api/v1/user/profile");
     console.log(res.data);
     setData(res.data.data._id);
   };

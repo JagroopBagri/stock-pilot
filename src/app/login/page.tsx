@@ -22,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await axios.post("/api/v1/users/login", user);
+      const response = await axios.post("/api/v1/user/login", user);
       if (response.status === 200) {
         router.push("/my-profile");
       }
@@ -38,7 +38,7 @@ export default function LoginPage() {
   const onForgotPasswordSubmit = async (email: string) => {
     setLoading(true);
     try {
-      await axios.post("/api/v1/users/forgot-password", { email });
+      await axios.post("/api/v1/user/forgot-password", { email });
       setFPModalOpen(false);
       setForgotEmail("");
       toast.success(

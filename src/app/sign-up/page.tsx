@@ -38,7 +38,7 @@ const Page = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("/api/v1/users/sign-up", user);
+      const response = await axios.post("/api/v1/user/sign-up", user);
       if (response.status === 201) {
         router.push("/login");
       }
@@ -67,7 +67,7 @@ const Page = () => {
         id={"firstName"}
         placeholder={"First Name"}
         value={user.firstName}
-        onChange={(e) => setUser({ ...user, firstName: e.target.value })}
+        onChange={(e) => setUser({...user, firstName: e.target.value })}
       />
       <label className={"flex flex-col items-start"} htmlFor={"lastName"}>
         Last Name
@@ -80,7 +80,7 @@ const Page = () => {
         id={"lastName"}
         placeholder={"Last Name"}
         value={user.lastName}
-        onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+        onChange={(e) => setUser({...user, lastName: e.target.value })}
       />
       <label className={"flex flex-col items-start"} htmlFor={"username"}>
         Username
@@ -93,7 +93,7 @@ const Page = () => {
         id={"username"}
         placeholder={"Username"}
         value={user.username}
-        onChange={(e) => setUser({ ...user, username: e.target.value })}
+        onChange={(e) => setUser({...user, username: e.target.value })}
       />
       <label htmlFor={"email"}>Email</label>
       <input
@@ -104,7 +104,7 @@ const Page = () => {
         id={"email"}
         placeholder={"Email"}
         value={user.email}
-        onChange={(e) => setUser({ ...user, email: e.target.value })}
+        onChange={(e) => setUser({...user, email: e.target.value })}
       />
 
       <label htmlFor={"password"}>Password</label>
@@ -116,7 +116,7 @@ const Page = () => {
         id={"password"}
         placeholder={"Password"}
         value={user.password}
-        onChange={(e) => setUser({ ...user, password: e.target.value })}
+        onChange={(e) => setUser({...user, password: e.target.value })}
       />
       <button
         className={
