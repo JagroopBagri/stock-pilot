@@ -6,7 +6,7 @@ const PUBLIC_FILE = /\.(.*)$/;
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  console.log("pathname is", pathname);
+  // console.log("pathname is", pathname);
   const url = req.url;
   if (
     pathname.startsWith("/_next") || // exclude Next.js internals
@@ -35,10 +35,11 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!verifiedToken && !url.includes("/login") && !url.includes("/sign-up")) {
-    return new NextResponse(
-      JSON.stringify({ error: "Unauthorized access. Please login again." }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
-    );
+    // return new NextResponse(
+    //   JSON.stringify({ error: "Unauthorized access. Please login again." }),
+    //   { status: 401, headers: { "Content-Type": "application/json" } }
+    // );
+    return NextResponse.redirect(new URL("/", url));
   }
 
   return NextResponse.next();

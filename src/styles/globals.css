@@ -17,3 +17,7 @@
 [data-theme="cmyk"] button:hover {
   color: black;
 }
+
+[data-theme="cmyk"] .navbar{
+  background-color: green !important;
+}
