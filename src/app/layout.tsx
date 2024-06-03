@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { Toaster } from "react-hot-toast";
+import NavBar from "@/components/NavBar/NavBar";
+import { useState, useContext } from "react";
+import Store from "@/components/Store";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,16 +32,19 @@ export default function RootLayout({
         type="image/<generated>"
         sizes="<generated>"
       />
-      <body className={inter.className}>
-        {children}
-        <Toaster
-          position="bottom-left"
-          toastOptions={{
-            className: "react-hot-toast",
-            duration: 5000,
-          }}
-        />
-      </body>
+      <Store>
+        <body className={inter.className}>
+          <NavBar></NavBar>
+          {children}
+          <Toaster
+            position="bottom-left"
+            toastOptions={{
+              className: "react-hot-toast",
+              duration: 5000,
+            }}
+          />
+        </body>
+      </Store>
     </html>
   );
 }

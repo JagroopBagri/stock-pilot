@@ -6,6 +6,7 @@ const PUBLIC_FILE = /\.(.*)$/;
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  // console.log("pathname is", pathname);
   const url = req.url;
   if (
     pathname.startsWith("/_next") || // exclude Next.js internals
@@ -14,11 +15,11 @@ export async function middleware(req: NextRequest) {
     url.includes("/static") ||
     pathname === "/" || // Exclude the homepage
     pathname.startsWith("/api/v1/crons") || // exclude crons
-    pathname.startsWith("/api/v1/users/sign-up") || // exclude sign up route
-    pathname.startsWith("/api/v1/users/login") || //exclude login route
-    pathname.startsWith("/api/v1/users/logout") || // exclude logout route
-    pathname.startsWith("/api/v1/users/forgot-password") || // exclude forgot-password route
-    pathname.startsWith("/api/v1/users/reset-password") || // exclude reset-password route
+    pathname.startsWith("/api/v1/user/sign-up") || // exclude sign up route
+    pathname.startsWith("/api/v1/user/login") || //exclude login route
+    pathname.startsWith("/api/v1/user/logout") || // exclude logout route
+    pathname.startsWith("/api/v1/user/forgot-password") || // exclude forgot-password route
+    pathname.startsWith("/api/v1/user/reset-password") || // exclude reset-password route
     PUBLIC_FILE.test(pathname) // exclude all files in the public folder
   ) {
     return NextResponse.next();
@@ -34,10 +35,11 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!verifiedToken && !url.includes("/login") && !url.includes("/sign-up")) {
-    return new NextResponse(
-      JSON.stringify({ error: "Unauthorized access. Please login again." }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
-    );
+    // return new NextResponse(
+    //   JSON.stringify({ error: "Unauthorized access. Please login again." }),
+    //   { status: 401, headers: { "Content-Type": "application/json" } }
+    // );
+    return NextResponse.redirect(new URL("/", url));
   }
 
   return NextResponse.next();

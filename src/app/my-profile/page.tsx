@@ -1,17 +1,21 @@
 "use client";
 import axios from "axios";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { UserContext, UserContextType } from "@/components/Store";
+
 
 export default function ProfilePage() {
   const router = useRouter();
   const [data, setData] = useState("nothing");
+  const {user, setUser} = useContext(UserContext) as UserContextType;
 
   const logout = async () => {
     try {
-      await axios.get("/api/v1/users/logout");
+      await axios.get("/api/v1/user/logout");
+      setUser(null);
       router.push("/login");
     } catch (error: any) {
       console.error(error?.response?.data);
@@ -20,7 +24,7 @@ export default function ProfilePage() {
   };
 
   const getUserDetails = async () => {
-    const res = await axios.get("/api/v1/users/profile");
+    const res = await axios.get("/api/v1/user/profile");
     console.log(res.data);
     setData(res.data.data._id);
   };

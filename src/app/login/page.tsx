@@ -1,29 +1,32 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PropagateLoader } from "react-spinners";
-import ToggleTheme from "@/components/ToggleTheme";
 import toast from "react-hot-toast";
+import { UserContext, UserContextType } from "@/components/Store";
 
-const defaultUserState = { username: "", password: "" };
+const defaultFormValues = { username: "", password: "" };
 
 export default function LoginPage() {
   const router = useRouter();
-  const [user, setUser] = useState(defaultUserState);
+  const [formValues, setFormValues] = useState(defaultFormValues);
   const [loading, setLoading] = useState<boolean>(false);
   const [forgotEmail, setForgotEmail] = useState<string>("");
   const [fpModalOpen, setFPModalOpen] = useState<boolean>(false);
   const fpModalRef = useRef<HTMLDialogElement>(null);
+  const {user, setUser} = useContext(UserContext) as UserContextType;
 
   // on login submit
   const onSubmit = async (e: any) => {
     setLoading(true);
     e.preventDefault();
     try {
-      const response = await axios.post("/api/v1/users/login", user);
+      const response = await axios.post("/api/v1/user/login", formValues);
       if (response.status === 200) {
+        setUser(response.data.user);
+        console.log("response is", response);
         router.push("/my-profile");
       }
     } catch (error: any) {
@@ -38,7 +41,7 @@ export default function LoginPage() {
   const onForgotPasswordSubmit = async (email: string) => {
     setLoading(true);
     try {
-      await axios.post("/api/v1/users/forgot-password", { email });
+      await axios.post("/api/v1/user/forgot-password", { email });
       setFPModalOpen(false);
       setForgotEmail("");
       toast.success(
@@ -72,15 +75,14 @@ export default function LoginPage() {
   return (
     <>
       <div className={"flex flex-col items-center h-screen p-5 w-full mt-52"}>
-        <ToggleTheme></ToggleTheme>
         <h1 className={"text-8xl mb-20"}>Stock Pilot</h1>
         <input
           className="input input-bordered w-full max-w-xs mb-6"
           type={"text"}
           id={"username"}
           placeholder={"Username"}
-          value={user.username}
-          onChange={(e) => setUser({ ...user, username: e.target.value })}
+          value={formValues.username}
+          onChange={(e) => setFormValues({ ...formValues, username: e.target.value })}
         />
 
         <input
@@ -88,8 +90,8 @@ export default function LoginPage() {
           type={"password"}
           id={"password"}
           placeholder={"Password"}
-          value={user.password}
-          onChange={(e) => setUser({ ...user, password: e.target.value })}
+          value={formValues.password}
+          onChange={(e) => setFormValues({ ...formValues, password: e.target.value })}
         />
         <button className={"btn bg-success"} onClick={onSubmit}>
           {loading ? <PropagateLoader /> : "Login"}

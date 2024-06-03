@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       .sign(encoder.encode(jwtSecret));
 
     // Use NextResponse to set the cookie directly
-    const response = NextResponse.json({ message: "Logged in successfully!" });
+    const response = NextResponse.json({ message: "Logged in successfully!", user });
     response.cookies.set("user-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

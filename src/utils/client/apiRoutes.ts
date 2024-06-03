@@ -3,7 +3,7 @@ type Routes = {
 }
 
 export const apiRoutes: Routes = {
-    logout: '/api/v1/users/logout',
-    login: '/api/v1/users/login',
-    signUp: '/api/v1/users/sign-up'
+    logout: '/api/v1/user/logout',
+    login: '/api/v1/user/login',
+    signUp: '/api/v1/user/sign-up'
 }
