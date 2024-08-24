@@ -7,48 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id                  Int          @id @default(autoincrement())
-  firstName           String       @db.VarChar(30)
-  lastName            String       @db.VarChar(30)
-  username            String       @unique @db.VarChar(50)
-  email               String       @unique @db.VarChar(255)
-  password            String       @db.VarChar(255)
-  isVerified          Boolean      @default(false)
+model User {
+  id                  Int      @id @default(autoincrement())
+  firstName           String   @db.VarChar(30)
+  lastName            String   @db.VarChar(30)
+  username            String   @unique @db.VarChar(50)
+  email               String   @unique @db.VarChar(255)
+  password            String   @db.VarChar(255)
+  isVerified          Boolean  @default(false)
   forgotPasswordToken String?
-  stockTrades         stockTrade[]
-  stocks              stock[]
-  createdAt           DateTime     @default(now()) @db.Timestamptz(6)
-  lastModified        DateTime     @updatedAt @db.Timestamptz(6)
+  trades              Trade[]
+  createdAt           DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @db.Timestamptz(6)
 }
 
 enum TradeType {
-  sale
-  purchase
+  BUY
+  SELL
+}
+model Trade {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  stockId     Int
+  stock       Stock     @relation(fields: [stockId], references: [id])
+  type        TradeType
+  quantity    Int
+  price       Decimal   @db.Decimal(10, 2)
+  totalAmount Decimal   @db.Decimal(10, 2)
+  date        DateTime
+  notes       String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
 }
 
-model stockTrade {
-  id           Int       @id @default(autoincrement())
-  userId       Int
-  user         users     @relation(fields: [userId], references: [id])
-  ticker       String    @db.VarChar(20)
-  type         TradeType
-  price        Decimal   @db.Decimal(10, 2)
-  dateOfTrade  DateTime
-  notes        String?   @db.VarChar(255)
-  stockId      Int
-  stock        stock     @relation(fields: [stockId], references: [id])
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  lastModified DateTime  @updatedAt @db.Timestamptz(6)
-}
-
-model stock {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  user         users        @relation(fields: [userId], references: [id])
-  ticker       String       @db.VarChar(20)
-  stockTrades  stockTrade[]
-  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
-  lastModified DateTime     @updatedAt @db.Timestamptz(6)
-  currentPrice Decimal?     @db.Decimal(10, 2)
+model Stock {
+  id           Int      @id @default(autoincrement())
+  ticker       String   @unique @db.VarChar(20)
+  companyName  String   @db.VarChar(100)
+  currentPrice Decimal? @db.Decimal(10, 2)
+  lastUpdated  DateTime?
+  trades       Trade[]
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
 }

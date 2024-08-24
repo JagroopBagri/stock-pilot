@@ -111,7 +111,10 @@ function NavBar() {
               </svg>
             </label>
           </div>
-          <div className="flex-1 px-2 mx-2 flex items-center space-x-2">
+          <div
+            className="flex-1 px-2 mx-2 flex items-center space-x-2 cursor-pointer"
+            onClick={() => handleNavigation("/")}
+          >
             <img src="/icon.png" alt="Stock Pilot Logo" className="w-8 h-8" />
             <span className="text-2xl">Stock Pilot</span>
           </div>

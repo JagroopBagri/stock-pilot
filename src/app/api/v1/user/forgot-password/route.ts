@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { email } = body;
 
     // check if a user with that email exists
-    let user = await prisma.users.findFirst({
+    let user = await prisma.user.findFirst({
       where: {
         email,
       },
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         .sign(encoder.encode(JWT_SECRET));
 
       // add the token to the users forgotPasswordToken
-      await prisma.users.update({
+      await prisma.user.update({
         where: {
           id: user.id,
         },

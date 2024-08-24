@@ -13,14 +13,14 @@ export async function POST(request: NextRequest) {
 
     const { username, password } = body;
     // check if the user already exists
-    let user = await prisma.users.findFirst({
+    let user = await prisma.user.findFirst({
       where: {
         username,
       },
     });
 
     if (!user) {
-      user = await prisma.users.findFirst({
+      user = await prisma.user.findFirst({
         where: {
           email: username,
         },

@@ -2,17 +2,17 @@
 import { useState, useEffect } from "react";
 
 function ToggleTheme() {
-  const [theme, setTheme] = useState<"dark" | "cmyk">("dark");
+  const [theme, setTheme] = useState<"dark" | "corporate">("dark");
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "cmyk" : "dark");
+    setTheme(theme === "dark" ? "corporate" : "dark");
   };
 
   useEffect(() => {
     const userThemePreference = localStorage.getItem("stock-pilot-theme");
-    if (userThemePreference === "cmyk") {
-      setTheme("cmyk");
-      document.querySelector("html")?.setAttribute("data-theme", "cmyk");
+    if (userThemePreference === "corporate") {
+      setTheme("corporate");
+      document.querySelector("html")?.setAttribute("data-theme", "corporate");
     }
   }, []);
 

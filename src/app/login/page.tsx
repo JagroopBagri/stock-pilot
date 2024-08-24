@@ -27,7 +27,7 @@ export default function LoginPage() {
       if (response.status === 200) {
         setUser(response.data.user);
         console.log("response is", response);
-        router.push("/my-profile");
+        router.push("/dashboard");
       }
     } catch (error: any) {
       console.error(error?.response?.data);

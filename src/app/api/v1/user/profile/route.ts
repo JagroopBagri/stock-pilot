@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     const userId = validationResp.id;
 
-    const user = await prisma.users.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         id: userId,
       },

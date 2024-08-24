@@ -10,14 +10,19 @@
   color: white;
 }
 
-[data-theme="cmyk"] button {
+[data-theme="dark"] input,
+[data-theme="dark"] p,
+[data-theme="dark"] div{
   color: white;
 }
 
-[data-theme="cmyk"] button:hover {
+[data-theme="corporate"] button {
+  color: white;
+}
+
+[data-theme="corporate"] button:hover {
   color: black;
 }
 
-[data-theme="cmyk"] .navbar{
-  background-color: green !important;
+[data-theme="corporate"] .navbar{
 }
