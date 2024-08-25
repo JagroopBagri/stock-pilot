@@ -2,11 +2,13 @@
   "name": "stock-pilot",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "update-stocks": "node --loader ts-node/esm --experimental-specifier-resolution=node scripts/runUpdateStocks.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -42,6 +44,7 @@
     "postcss-simple-vars": "^7.0.1",
     "prisma": "^5.11.0",
     "tailwindcss": "^3.3.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

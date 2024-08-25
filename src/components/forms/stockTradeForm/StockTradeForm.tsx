@@ -11,6 +11,7 @@ import {
   Box,
   Typography,
   Grid,
+  Autocomplete
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -33,26 +34,52 @@ const StockTradeForm: React.FC<StockTradeFormProps> = ({
   onTradeAdded,
 }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
-  const [selectedStock, setSelectedStock] = useState<number>(0);
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [tradeType, setTradeType] = useState<"BUY" | "SELL">("BUY");
   const [quantity, setQuantity] = useState<number | "">(0);
   const [price, setPrice] = useState<string>("");
   const [date, setDate] = useState<Dayjs | null>(dayjs());
   const [notes, setNotes] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchStocks();
   }, []);
 
-  const fetchStocks = async () => {
+  const fetchStocks = async (newSearch?: string) => {
+    if ((!hasMore && !newSearch) || loading) return;
+    setLoading(true);
     try {
-      const response = await axios.get("/api/v1/stocks");
-      setStocks(response.data.data);
+      const searchToUse = newSearch !== undefined ? newSearch : searchTerm;
+      const response = await axios.get("/api/v1/stocks", {
+        params: {
+          page: newSearch !== undefined ? 1 : page,
+          limit: 50,
+          search: searchToUse,
+        },
+      });
+      const newStocks = response.data.data;
+      setStocks((prevStocks) => newSearch !== undefined ? newStocks : [...prevStocks, ...newStocks]);
+      setHasMore(response.data.meta.hasMore);
+      setPage((prevPage) => newSearch !== undefined ? 2 : prevPage + 1);
+      if (newSearch !== undefined) {
+        setSearchTerm(newSearch);
+      }
     } catch (error) {
       console.error("Failed to fetch stocks:", error);
       toast.error("Failed to fetch stocks");
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleStockSearch = (event: React.ChangeEvent<{}>, value: string) => {
+    fetchStocks(value);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,25 +117,35 @@ const StockTradeForm: React.FC<StockTradeFormProps> = ({
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel id="stock-select-label">Stock</InputLabel>
-              <Select
-                labelId="stock-select-label"
-                value={selectedStock}
-                onChange={(e) => setSelectedStock(Number(e.target.value))}
-                label="Stock"
-                required
-              >
-                <MenuItem value="">
-                  <em>Select a stock</em>
-                </MenuItem>
-                {stocks.map((stock) => (
-                  <MenuItem key={stock.id} value={stock.id}>
-                    {stock.ticker} - {stock.companyName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <Autocomplete
+              options={stocks}
+              getOptionLabel={(option) => `${option.ticker} - ${option.companyName}`}
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  label="Stock" 
+                  required 
+                  placeholder="Search by company name or ticker"
+                />
+              )}
+              value={selectedStock}
+              onChange={(event, newValue) => {
+                setSelectedStock(newValue);
+              }}
+              onInputChange={handleStockSearch}
+              filterOptions={(x) => x}
+              loadingText="Loading stocks..."
+              loading={loading}
+              onScroll={(event) => {
+                const listboxNode = event.currentTarget;
+                if (
+                  listboxNode.scrollTop + listboxNode.clientHeight ===
+                  listboxNode.scrollHeight
+                ) {
+                  fetchStocks();
+                }
+              }}
+            />
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>

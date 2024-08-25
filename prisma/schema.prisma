@@ -44,7 +44,7 @@ model Trade {
 model Stock {
   id           Int      @id @default(autoincrement())
   ticker       String   @unique @db.VarChar(20)
-  companyName  String   @db.VarChar(100)
+  companyName  String   
   currentPrice Decimal? @db.Decimal(10, 2)
   lastUpdated  DateTime?
   trades       Trade[]
