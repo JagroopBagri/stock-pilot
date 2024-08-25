@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { Toaster } from "react-hot-toast";
-import NavBar from "@/components/NavBar/NavBar";
 import Store from "@/components/Store";
+import ThemeWrapper from "@/components/ThemeWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en">
       <link
         rel="icon"
         href="/icon.png"
@@ -33,11 +33,8 @@ export default function RootLayout({
       />
       <body className={inter.className}>
         <Store>
-          <>
-            <NavBar></NavBar>
-            <div style={{padding: "4rem"}}>
+          <ThemeWrapper>
             {children}
-            </div>
             <Toaster
               position="bottom-left"
               toastOptions={{
@@ -45,7 +42,7 @@ export default function RootLayout({
                 duration: 5000,
               }}
             />
-          </>
+          </ThemeWrapper>
         </Store>
       </body>
     </html>

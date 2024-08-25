@@ -2,10 +2,16 @@
 import axios from "axios";
 import Link from "next/link";
 import React, { useState, useContext } from "react";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { UserContext, UserContextType } from "@/components/Store";
-
+import { 
+  Button, 
+  Typography, 
+  Container, 
+  Box,
+  Paper
+} from "@mui/material";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -24,38 +30,68 @@ export default function ProfilePage() {
   };
 
   const getUserDetails = async () => {
-    const res = await axios.get("/api/v1/user/profile");
-    console.log(res.data);
-    setData(res.data.data._id);
+    try {
+      const res = await axios.get("/api/v1/user/profile");
+      console.log(res.data);
+      setData(res.data.data._id);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      toast.error("Failed to fetch user details");
+    }
   };
 
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1>Profile</h1>
-      <hr />
-      <p>Profile page</p>
-      <h2 className="p-1 rounded bg-green-500">
-        {data === "nothing" ? (
-          "Nothing"
-        ) : (
-          <Link href={`/my-profile/${data}`}>{data}</Link>
-        )}
-      </h2>
-      <hr />
-      <button
-        onClick={logout}
-        className="bg-blue-500 mt-4 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    <Container component="main" maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
-        Logout
-      </button>
-
-      <button
-        onClick={getUserDetails}
-        className="bg-green-800 mt-4 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        GetUser Details
-      </button>
-    </div>
+        <Typography component="h1" variant="h4" sx={{ mb: 4 }}>
+          Profile
+        </Typography>
+        <Paper elevation={3} sx={{ p: 3, width: '100%', mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            User ID:
+          </Typography>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              p: 1, 
+              bgcolor: 'success.light', 
+              borderRadius: 1,
+              wordBreak: 'break-all'
+            }}
+          >
+            {data === "nothing" ? (
+              "Nothing"
+            ) : (
+              <Link href={`/my-profile/${data}`}>{data}</Link>
+            )}
+          </Typography>
+        </Paper>
+        <Box sx={{ mt: 2, width: '100%' }}>
+          <Button
+            onClick={logout}
+            fullWidth
+            variant="contained"
+            sx={{ mb: 2 }}
+          >
+            Logout
+          </Button>
+          <Button
+            onClick={getUserDetails}
+            fullWidth
+            variant="contained"
+          >
+            Get User Details
+          </Button>
+        </Box>
+      </Box>
+      <Toaster />
+    </Container>
   );
 }

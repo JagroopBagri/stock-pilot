@@ -4,139 +4,164 @@ import ToggleTheme from "../ToggleTheme";
 import { menuItems, MenuItem } from "./helpers/menuItems";
 import { useRouter } from "next/navigation";
 import { UserContext, UserContextType } from "../Store";
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  IconButton, 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Collapse, 
+  Box,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
-function NavBar() {
+interface NavBarProps {
+  toggleTheme: () => void;
+}
+
+function NavBar({ toggleTheme }: NavBarProps) {
   const router = useRouter();
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const { user, setUser } = useContext(UserContext) as UserContextType;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+  const { user } = useContext(UserContext) as UserContextType;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleNavigation = (route: string) => {
     router.push(route);
+    if (isMobile) {
+      setMobileOpen(false);
+    }
   };
 
-  const handleMouseEnter = (name: string) => {
-    setActiveMenu(name);
+  const handleSubMenuToggle = (name: string) => {
+    setOpenSubMenu(openSubMenu === name ? null : name);
   };
 
-  const handleMouseLeave = () => {
-    setActiveMenu(null);
+  const shouldShowMenuItem = (item: MenuItem): boolean => {
+    if (user?.id) {
+      return !item.hide?.includes("logged-in");
+    } else {
+      return !item.hide?.includes("logged-out");
+    }
   };
 
-  const renderNavBarMenuItems = (
-    menuItems: MenuItem[],
-    isSidebar: boolean = false
-  ) => {
-    return menuItems.map((item, index) => {
-      if (item.hide?.includes("logged-in") && user?.id) {
-        return undefined;
-      } else if (item.hide?.includes("logged-out") && !user?.id) {
-        return undefined;
-      } else {
+  const renderMenuItems = (items: MenuItem[], isMobile: boolean = false) => {
+    return items.map((item) => {
+      if (!shouldShowMenuItem(item)) {
+        return null;
+      }
+
+      const listItem = (
+        <ListItem 
+          button 
+          onClick={() => item.children ? handleSubMenuToggle(item.name) : handleNavigation(item.route)}
+          key={item.name}
+        >
+          <ListItemText primary={item.name} />
+          {item.children && (openSubMenu === item.name ? <ExpandLess /> : <ExpandMore />)}
+        </ListItem>
+      );
+
+      if (item.children) {
         return (
-          <li key={item.name + index} className="relative">
-            <a
-              onClick={() => handleNavigation(item.route)}
-              onMouseEnter={() => !isSidebar && handleMouseEnter(item.name)}
-              onMouseLeave={() => !isSidebar && handleMouseLeave()}
-              className="cursor-pointer"
-            >
-              {item.name}
-            </a>
-            {item.children &&
-              item.children.length > 0 &&
-              (isSidebar ? (
-                <ul className="pl-4" key={item.name + "child-ul" + index}>
-                  {item.children.map((child, index) => (
-                    <li key={child.name + index}>
-                      <a
-                        onClick={() => handleNavigation(child.route)}
-                        className="cursor-pointer"
-                      >
-                        {child.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                activeMenu === item.name && (
-                  <ul
-                    className="absolute bg-base-200 p-2 shadow-lg"
-                    style={{ left: 0, top: "100%" }}
-                    onMouseEnter={() => handleMouseEnter(item.name)}
-                    onMouseLeave={handleMouseLeave}
-                    key={item.name + "child-ul" + index}
-                  >
-                    {item.children.map((child, index) => (
-                      <li key={child.name + index}>
-                        <a
-                          onClick={() => handleNavigation(child.route)}
-                          className="cursor-pointer"
-                        >
-                          {child.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                )
-              ))}
-          </li>
+          <div key={item.name}>
+            {listItem}
+            <Collapse in={openSubMenu === item.name} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {renderMenuItems(item.children, isMobile)}
+              </List>
+            </Collapse>
+          </div>
         );
       }
+
+      return listItem;
     });
   };
 
+  const drawer = (
+    <div>
+      <Toolbar />
+      <List>
+        {renderMenuItems(menuItems, true)}
+      </List>
+    </div>
+  );
+
   return (
-    <div className="drawer">
-      <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
-        <div className="w-full navbar bg-base-300">
-          <div className="flex-none lg:hidden">
-            <label
-              htmlFor="my-drawer-3"
-              aria-label="open sidebar"
-              className="btn btn-square btn-ghost"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                className="inline-block w-6 h-6 stroke-current"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                ></path>
-              </svg>
-            </label>
-          </div>
-          <div
-            className="flex-1 px-2 mx-2 flex items-center space-x-2 cursor-pointer"
+    <>
+      <AppBar position="fixed">
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { md: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              cursor: 'pointer',
+              flexGrow: 1
+            }}
             onClick={() => handleNavigation("/")}
           >
-            <img src="/icon.png" alt="Stock Pilot Logo" className="w-8 h-8" />
-            <span className="text-2xl">Stock Pilot</span>
-          </div>
-          <ToggleTheme />
-          <div className="flex-none hidden lg:block">
-            <ul className="menu menu-horizontal">
-              {renderNavBarMenuItems(menuItems)}
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div className="drawer-side">
-        <label
-          htmlFor="my-drawer-3"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <ul className="menu p-4 w-80 min-h-full bg-base-200">
-          {renderNavBarMenuItems(menuItems, true)}
-        </ul>
-      </div>
-    </div>
+            <img src="/icon.png" alt="Stock Pilot Logo" style={{ width: 32, height: 32, marginRight: 8 }} />
+            <Typography variant="h6" noWrap component="div">
+              Stock Pilot
+            </Typography>
+          </Box>
+          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+            {menuItems.map((item) => (
+              shouldShowMenuItem(item) && (
+                <Button
+                  key={item.name}
+                  color="inherit"
+                  onClick={() => handleNavigation(item.route)}
+                >
+                  {item.name}
+                </Button>
+              )
+            ))}
+          </Box>
+          <ToggleTheme toggleTheme={toggleTheme} />
+        </Toolbar>
+      </AppBar>
+      <Box component="nav">
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+      <Toolbar /> {/* This empty Toolbar acts as a spacer */}
+    </>
   );
 }
 

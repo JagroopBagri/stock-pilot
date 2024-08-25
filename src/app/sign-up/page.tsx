@@ -2,8 +2,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BounceLoader } from "react-spinners";
+import { CircularProgress } from "@mui/material";
 import axios from "axios";
+import { 
+  TextField, 
+  Button, 
+  Typography, 
+  Container, 
+  Box,
+  Grid
+} from "@mui/material";
 
 const Page = () => {
   const router = useRouter();
@@ -16,8 +24,7 @@ const Page = () => {
     username: "",
     isVerified: false,
   });
-
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
 
   useEffect(() => {
     if (
@@ -33,10 +40,9 @@ const Page = () => {
     }
   }, [user]);
 
-  const onSubmit = async (e: any) => {
-    setLoading(true);
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
       const response = await axios.post("/api/v1/user/sign-up", user);
       if (response.status === 201) {
@@ -50,87 +56,104 @@ const Page = () => {
   };
 
   return (
-    <div
-      className={
-        "flex flex-col items-center justify-center h-screen p-5 w-full"
-      }
-    >
-      <h1 className={"text-2xl my-16"}>Sign Up</h1>
-      <label className={"flex flex-col items-start"} htmlFor={"firstName"}>
-        First Name
-      </label>
-      <input
-        className={
-          " text-black my-4 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
-        }
-        type={"text"}
-        id={"firstName"}
-        placeholder={"First Name"}
-        value={user.firstName}
-        onChange={(e) => setUser({...user, firstName: e.target.value })}
-      />
-      <label className={"flex flex-col items-start"} htmlFor={"lastName"}>
-        Last Name
-      </label>
-      <input
-        className={
-          " text-black my-4 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
-        }
-        type={"text"}
-        id={"lastName"}
-        placeholder={"Last Name"}
-        value={user.lastName}
-        onChange={(e) => setUser({...user, lastName: e.target.value })}
-      />
-      <label className={"flex flex-col items-start"} htmlFor={"username"}>
-        Username
-      </label>
-      <input
-        className={
-          " text-black my-4 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
-        }
-        type={"text"}
-        id={"username"}
-        placeholder={"Username"}
-        value={user.username}
-        onChange={(e) => setUser({...user, username: e.target.value })}
-      />
-      <label htmlFor={"email"}>Email</label>
-      <input
-        className={
-          "text-black my-4 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
-        }
-        type={"text"}
-        id={"email"}
-        placeholder={"Email"}
-        value={user.email}
-        onChange={(e) => setUser({...user, email: e.target.value })}
-      />
-
-      <label htmlFor={"password"}>Password</label>
-      <input
-        className={
-          "text-black my-4 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white"
-        }
-        type={"password"}
-        id={"password"}
-        placeholder={"Password"}
-        value={user.password}
-        onChange={(e) => setUser({...user, password: e.target.value })}
-      />
-      <button
-        className={
-          "mt-4 border-2 border-white py-2 rounded hover:bg-white hover:text-black p-2 cursor-pointer"
-        }
-        onClick={onSubmit}
-        disabled={buttonDisabled}
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
-        {loading ? <BounceLoader className={""} /> : "Sign Up"}
-      </button>
-      <Link className={"text-sm my-2"} href={"/login"}>
-        Already have an account? Login
-      </Link>
-    </div>
+        <Typography component="h1" variant="h4" sx={{ my: 4 }}>
+          Sign Up
+        </Typography>
+        <Box component="form" onSubmit={onSubmit} sx={{ mt: 3 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                autoComplete="given-name"
+                name="firstName"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                autoFocus
+                value={user.firstName}
+                onChange={(e) => setUser({...user, firstName: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                autoComplete="family-name"
+                value={user.lastName}
+                onChange={(e) => setUser({...user, lastName: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
+                value={user.username}
+                onChange={(e) => setUser({...user, username: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                value={user.email}
+                onChange={(e) => setUser({...user, email: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                value={user.password}
+                onChange={(e) => setUser({...user, password: e.target.value })}
+              />
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={buttonDisabled || loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Sign Up"}
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link href="/login" passHref>
+                <Typography variant="body2" sx={{ cursor: 'pointer', color: 'primary.main' }}>
+                  Already have an account? Login
+                </Typography>
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 

@@ -1,11 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { PropagateLoader } from "react-spinners";
-import ToggleTheme from "@/components/ToggleTheme";
-import toast from "react-hot-toast";
+import { CircularProgress } from "@mui/material";
+import { toast, Toaster } from "react-hot-toast";
+import { 
+  TextField, 
+  Button, 
+  Typography, 
+  Container, 
+  Box
+} from "@mui/material";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -21,10 +27,7 @@ export default function ResetPasswordPage() {
 
   const resetToken = searchParams ? searchParams.get("reset_token") : null;
 
-  // Function to handle the password update submission
-  const onUpdatePasswordSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const onUpdatePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -46,28 +49,51 @@ export default function ResetPasswordPage() {
   };
 
   return (
-      <div className="flex flex-col items-center h-screen p-5 w-full mt-52">
-        <ToggleTheme />
-        <h1 className="text-8xl mb-20">Stock Pilot</h1>
-        <form
-          className="flex flex-col items-center w-full max-w-xs"
-          onSubmit={onUpdatePasswordSubmit}
-        >
-          <input
-            className="input input-bordered w-full mb-6"
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h2" sx={{ mb: 4 }}>
+          Stock Pilot
+        </Typography>
+        <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
+          Reset Password
+        </Typography>
+        <Box component="form" onSubmit={onUpdatePasswordSubmit} sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="New Password"
             type="password"
-            placeholder="Enter a new password"
+            id="password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
-          <button className="btn bg-success" type="submit" disabled={!password}>
-            {loading ? <PropagateLoader /> : "Update Password"}
-          </button>
-          <Link href="/login" className="link-primary mt-6">
-            Go to Login
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={!password || loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Update Password"}
+          </Button>
+          <Link href="/login" passHref>
+            <Typography variant="body2" sx={{ mt: 2, cursor: 'pointer', color: 'primary.main' }}>
+              Go to Login
+            </Typography>
           </Link>
-        </form>
-      </div>
+        </Box>
+      </Box>
+      <Toaster />
+    </Container>
   );
 }
