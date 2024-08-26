@@ -24,12 +24,12 @@ interface Stock {
   companyName: string;
 }
 
-interface StockTradeFormProps {
+interface PurchaseTradeFormProps {
   onClose: () => void;
   onTradeAdded: () => void;
 }
 
-const StockTradeForm: React.FC<StockTradeFormProps> = ({
+const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   onClose,
   onTradeAdded,
 }) => {
@@ -85,10 +85,10 @@ const StockTradeForm: React.FC<StockTradeFormProps> = ({
     e.preventDefault();
     try {
       await axios.post("/api/v1/user/trades", {
-        stockId: selectedStock,
+        stockId: selectedStock?.id || null,
         type: tradeType,
-        quantity: typeof quantity === "number" ? quantity : 0,
-        price: typeof price === "number" ? price : 0,
+        quantity,
+        price,
         date: date ? date.format("YYYY-MM-DD") : null,
         notes,
       });
@@ -225,4 +225,4 @@ const StockTradeForm: React.FC<StockTradeFormProps> = ({
   );
 };
 
-export default StockTradeForm;
+export default PurchaseTradeForm;

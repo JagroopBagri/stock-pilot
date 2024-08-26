@@ -14,12 +14,13 @@ export async function GET(req: NextRequest) {
 
     const userId = validationResp.id;
 
-    const trades = await prisma.trade.findMany({
+    const purchasedTrades = await prisma.purchaseTrade.findMany({
       where: {
         userId: userId,
       },
       include: {
         stock: true,
+        soldTrades: true,
       },
       orderBy: {
         date: 'desc',
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       message: "Trades fetched successfully",
-      data: trades,
+      data: purchasedTrades,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -45,13 +46,12 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = validationResp.id;
-    const { stockId, type, quantity, price, date, notes } = await req.json();
+    const { stockId, quantity, price, date, notes } = await req.json();
 
-    const trade = await prisma.trade.create({
+    const trade = await prisma.purchaseTrade.create({
       data: {
         userId,
         stockId,
-        type,
         quantity,
         price,
         totalAmount: quantity * price,

@@ -8,46 +8,61 @@ datasource db {
 }
 
 model User {
-  id                  Int      @id @default(autoincrement())
-  firstName           String   @db.VarChar(30)
-  lastName            String   @db.VarChar(30)
-  username            String   @unique @db.VarChar(50)
-  email               String   @unique @db.VarChar(255)
-  password            String   @db.VarChar(255)
-  isVerified          Boolean  @default(false)
+  id                  Int             @id @default(autoincrement())
+  firstName           String          @db.VarChar(30)
+  lastName            String          @db.VarChar(30)
+  username            String          @unique @db.VarChar(50)
+  email               String          @unique @db.VarChar(255)
+  password            String          @db.VarChar(255)
+  isVerified          Boolean         @default(false)
   forgotPasswordToken String?
-  trades              Trade[]
-  createdAt           DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt           DateTime @updatedAt @db.Timestamptz(6)
+  purchasedTrades     PurchaseTrade[]
+  saleTrades          SaleTrade[]
+  createdAt           DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime        @updatedAt @db.Timestamptz(6)
 }
 
-enum TradeType {
-  BUY
-  SELL
-}
-model Trade {
-  id          Int       @id @default(autoincrement())
+model PurchaseTrade {
+  id          Int         @id @default(autoincrement())
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
   stockId     Int
-  stock       Stock     @relation(fields: [stockId], references: [id])
-  type        TradeType
+  stock       Stock       @relation(fields: [stockId], references: [id])
   quantity    Int
-  price       Decimal   @db.Decimal(10, 2)
-  totalAmount Decimal   @db.Decimal(10, 2)
+  price       Decimal     @db.Decimal(10, 2)
+  totalAmount Decimal     @db.Decimal(10, 2)
+  netProfit   Decimal     @db.Decimal(10, 2)
   date        DateTime
-  notes       String?   @db.VarChar(255)
-  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
+  notes       String?     @db.VarChar(255)
+  saleTrades  SaleTrade[]
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @db.Timestamptz(6)
+}
+
+model SaleTrade {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id])
+  purchaseTradeId Int
+  purchaseTrade   PurchaseTrade @relation(fields: [purchaseTradeId], references: [id])
+  quantity        Int
+  sellPrice       Decimal       @db.Decimal(10, 2)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  buyPrice        Decimal       @db.Decimal(10, 2)
+  netProfit       Decimal       @db.Decimal(10, 2)
+  date            DateTime
+  notes           String?       @db.VarChar(255)
+  createdAt       DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(6)
 }
 
 model Stock {
-  id           Int      @id @default(autoincrement())
-  ticker       String   @unique @db.VarChar(20)
-  companyName  String   
-  currentPrice Decimal? @db.Decimal(10, 2)
+  id           Int             @id @default(autoincrement())
+  ticker       String          @unique @db.VarChar(20)
+  companyName  String
+  currentPrice Decimal?        @db.Decimal(10, 2)
   lastUpdated  DateTime?
-  trades       Trade[]
-  createdAt    DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+  trades       PurchaseTrade[]
+  createdAt    DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime        @updatedAt @db.Timestamptz(6)
 }

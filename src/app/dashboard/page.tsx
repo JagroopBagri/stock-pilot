@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { UserContext, UserContextType } from "@/components/Store";
 import { toast } from "react-hot-toast";
-import StockTradeForm from "@/components/forms/stockTradeForm/StockTradeForm";
+import PurchaseTradeForm from "@/components/forms/purchaseTradeForm/PurchaseTradeForm";
 import {
   Table,
   TableBody,
@@ -19,6 +19,7 @@ import {
   Container,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import Decimal from 'decimal.js';
 
 interface Trade {
   id: number;
@@ -60,6 +61,7 @@ export default function DashboardPage() {
     try {
       const response = await axios.get("/api/v1/user/trades");
       setTrades(response.data.data);
+      console.log("response is", response.data)
     } catch (error) {
       console.error("Failed to fetch trades:", error);
       toast.error("Failed to fetch trades");
@@ -108,11 +110,11 @@ export default function DashboardPage() {
                     <TableCell component="th" scope="row">
                       {new Date(trade.date).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>{`${trade.stock.ticker} - ${trade.stock.companyName}`}</TableCell>
+                    <TableCell>{`${trade.stock.ticker}`}</TableCell>
                     <TableCell>{trade.type}</TableCell>
                     <TableCell align="right">{trade.quantity}</TableCell>
-                    <TableCell align="right">${trade.price.toFixed(2)}</TableCell>
-                    <TableCell align="right">${trade.totalAmount.toFixed(2)}</TableCell>
+                    <TableCell align="right">${new Decimal(trade.price).toFixed(2)}</TableCell>
+            <TableCell align="right">${new Decimal(trade.totalAmount).toFixed(2)}</TableCell>
                     <TableCell>{trade.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
@@ -130,7 +132,7 @@ export default function DashboardPage() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={modalStyle}>
-          <StockTradeForm
+          <PurchaseTradeForm
             onClose={toggleTradeForm}
             onTradeAdded={fetchTrades}
           />
