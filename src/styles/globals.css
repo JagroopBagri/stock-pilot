@@ -2,22 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-[data-theme="dark"] button {
-  color: black;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-[data-theme="dark"] button:hover {
-  color: white;
+body {
+  display: flex;
+  flex-direction: column;
 }
 
-[data-theme="cmyk"] button {
-  color: white;
-}
-
-[data-theme="cmyk"] button:hover {
-  color: black;
-}
-
-[data-theme="cmyk"] .navbar{
-  background-color: green !important;
+#__next {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }

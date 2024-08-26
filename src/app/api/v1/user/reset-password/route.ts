@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userResponse = await prisma.users.findFirst({
+    const userResponse = await prisma.user.findFirst({
       where: {
         AND: [
           {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    await prisma.users.update({
+    await prisma.user.update({
       where: {
         id: userResponse.id,
       },
