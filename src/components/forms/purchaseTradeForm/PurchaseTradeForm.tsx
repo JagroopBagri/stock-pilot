@@ -35,7 +35,6 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
 }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
-  const [tradeType, setTradeType] = useState<"BUY" | "SELL">("BUY");
   const [quantity, setQuantity] = useState<number | "">(0);
   const [price, setPrice] = useState<string>("");
   const [date, setDate] = useState<Dayjs | null>(dayjs());
@@ -54,7 +53,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
     setLoading(true);
     try {
       const searchToUse = newSearch !== undefined ? newSearch : searchTerm;
-      const response = await axios.get("/api/v1/stocks", {
+      const response = await axios.get<{ data: Stock[], meta: { hasMore: boolean } }>("/api/v1/stocks", {
         params: {
           page: newSearch !== undefined ? 1 : page,
           limit: 50,
@@ -62,7 +61,25 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
         },
       });
       const newStocks = response.data.data;
-      setStocks((prevStocks) => newSearch !== undefined ? newStocks : [...prevStocks, ...newStocks]);
+  
+      setStocks((prevStocks) => {
+        let updatedStocks: Stock[];
+        if (newSearch !== undefined) {
+          // For a new search, just use the new stocks
+          updatedStocks = newStocks;
+        } else {
+          // For pagination, combine previous and new stocks
+          updatedStocks = [...prevStocks, ...newStocks];
+        }
+  
+        // Remove duplicates based on stock id
+        const uniqueStocks = Array.from(
+          new Map(updatedStocks.map(stock => [stock.id, stock])).values()
+        ) as Stock[];
+  
+        return uniqueStocks;
+      });
+  
       setHasMore(response.data.meta.hasMore);
       setPage((prevPage) => newSearch !== undefined ? 2 : prevPage + 1);
       if (newSearch !== undefined) {
@@ -86,7 +103,6 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
     try {
       await axios.post("/api/v1/user/trades", {
         stockId: selectedStock?.id || null,
-        type: tradeType,
         quantity,
         price,
         date: date ? date.format("YYYY-MM-DD") : null,
@@ -146,21 +162,6 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
                 }
               }}
             />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel id="trade-type-label">Trade Type</InputLabel>
-              <Select
-                labelId="trade-type-label"
-                value={tradeType}
-                onChange={(e) => setTradeType(e.target.value as "BUY" | "SELL")}
-                label="Trade Type"
-                required
-              >
-                <MenuItem value="BUY">Buy</MenuItem>
-                <MenuItem value="SELL">Sell</MenuItem>
-              </Select>
-            </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField

@@ -32,7 +32,7 @@ export default function ProfilePage() {
   const getUserDetails = async () => {
     try {
       const res = await axios.get("/api/v1/user/profile");
-      console.log(res.data);
+   
       setData(res.data.data._id);
     } catch (error) {
       console.error("Error fetching user details:", error);

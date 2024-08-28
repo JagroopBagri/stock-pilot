@@ -28,7 +28,8 @@ export default function Store({ children }: Props) {
       if (response.data && response.data.data) {
         setUser(response.data.data);
       }
-    } catch (error) {
+    } catch (error:any) {
+      if(error.response.data.error === "Unauthorized") return
       console.error("Failed to fetch user data:", error);
       toast.error("Failed to fetch user data");
     }

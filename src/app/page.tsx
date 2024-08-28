@@ -9,11 +9,8 @@ export default function HomePage() {
   const router = useRouter();
  
   useEffect(() => {
-    if (user === null) return; // User data is still loading
     if (user?.id) {
       router.push("/dashboard")
-    } else {
-      router.push("/login")
     }
   }, [user, router]);
 
