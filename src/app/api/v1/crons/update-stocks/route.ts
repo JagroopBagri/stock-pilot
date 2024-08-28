@@ -27,7 +27,6 @@ async function fetchAllStocks(polygonApiKey: string) {
       break;
     }
   }
-
   return allStocks;
 }
 

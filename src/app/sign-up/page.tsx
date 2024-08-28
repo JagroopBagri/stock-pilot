@@ -12,6 +12,7 @@ import {
   Box,
   Grid
 } from "@mui/material";
+import { toast } from "react-hot-toast";
 
 const Page = () => {
   const router = useRouter();
@@ -35,6 +36,7 @@ const Page = () => {
       }
     } catch (error: any) {
       console.error(error?.response?.data);
+      toast.error("Error: Please refresh and try again.");
     } finally {
       setLoading(false);
     }

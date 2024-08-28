@@ -22,7 +22,6 @@ export async function middleware(req: NextRequest) {
   ) {
     return NextResponse.next();
   }
-  console.log("running middleware");
 
   const token = req.cookies.get("user-token")?.value || "";
 
