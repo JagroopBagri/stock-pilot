@@ -24,21 +24,6 @@ const Page = () => {
     username: "",
     isVerified: false,
   });
-  const [buttonDisabled, setButtonDisabled] = useState(true);
-
-  useEffect(() => {
-    if (
-      user.email.length > 0 &&
-      user.password.length > 0 &&
-      user.username.length > 0 &&
-      user.firstName.length > 0 &&
-      user.lastName.length > 0
-    ) {
-      setButtonDisabled(false);
-    } else {
-      setButtonDisabled(true);
-    }
-  }, [user]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -138,7 +123,7 @@ const Page = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={buttonDisabled || loading}
+            disabled={loading}
           >
             {loading ? <CircularProgress size={24} /> : "Sign Up"}
           </Button>

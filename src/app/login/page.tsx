@@ -36,7 +36,6 @@ export default function LoginPage() {
       const response = await axios.post("/api/v1/user/login", formValues);
       if (response.status === 200) {
         setUser(response.data.user);
-        console.log("response is", response);
         router.push("/dashboard");
       }
     } catch (error: any) {

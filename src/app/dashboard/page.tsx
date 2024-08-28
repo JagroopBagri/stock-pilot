@@ -61,7 +61,6 @@ export default function DashboardPage() {
     try {
       const response = await axios.get("/api/v1/user/trades");
       setTrades(response.data.data);
-      console.log("response is", response.data)
     } catch (error) {
       console.error("Failed to fetch trades:", error);
       toast.error("Failed to fetch trades");

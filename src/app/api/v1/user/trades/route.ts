@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       },
       include: {
         stock: true,
-        soldTrades: true,
+        saleTrades: true,
       },
       orderBy: {
         date: 'desc',
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = validationResp.id;
-    const { stockId, quantity, price, date, notes } = await req.json();
+    const { stockId, quantity, price, date, notes, netProfit = 0 } = await req.json();
 
     const trade = await prisma.purchaseTrade.create({
       data: {
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
         totalAmount: quantity * price,
         date: new Date(date),
         notes,
+        netProfit
       },
     });
 
