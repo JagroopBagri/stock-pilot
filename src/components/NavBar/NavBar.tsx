@@ -127,7 +127,7 @@ function NavBar({ toggleTheme }: NavBarProps) {
             onClick={() => handleNavigation("/")}
           >
             <img src="/icon.png" alt="Stock Pilot Logo" style={{ width: 32, height: 32, marginRight: 8 }} />
-            <Typography variant="h6" noWrap component="div">
+            <Typography variant="h6" noWrap component="div" sx={{color: appColors.black}}>
               Stock Pilot
             </Typography>
           </Box>
@@ -136,8 +136,8 @@ function NavBar({ toggleTheme }: NavBarProps) {
               shouldShowMenuItem(item) && (
                 <Button
                   key={item.name}
-                  color="inherit"
                   onClick={() => handleNavigation(item.route)}
+                  sx={{color: appColors.black}}
                 >
                   {item.name}
                 </Button>

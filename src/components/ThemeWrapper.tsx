@@ -23,8 +23,8 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
     palette: {
       mode,
       background: {
-        default: mode === "dark" ? "#1e1e1e" : "#f5f5f5",
-        paper: mode === "dark" ? "#2d2d2d" : "#ffffff",
+        default: mode === "dark" ? appColors.charcoal : appColors.whiteSmoke,
+        paper: mode === "dark" ? appColors.darkGrey : appColors.white,
       },
       primary: {
         main: appColors.green, // This sets the primary color to green
@@ -37,11 +37,11 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
             backgroundColor: appColors.green,
             color: "white",
             "&:hover": {
-              backgroundColor: "#45a049",
+              backgroundColor: appColors.darkGreen,
             },
           },
           text: {
-            color: mode === "dark" ? "#ffffff" : "#000000",
+            color: mode === "dark" ? appColors.white : appColors.black,
             "&:hover": {
               backgroundColor:
                 mode === "dark"
@@ -58,17 +58,17 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
           },
           contained: {
             backgroundColor: appColors.green,
-            color: "white",
+            color: mode === "dark" ? appColors.black : appColors.black,
             padding: "10px 20px",
             borderRadius: " 4px",
             transition: "background-color 0.3s",
             "&:hover": {
-              backgroundColor: "#45a049",
+              backgroundColor: appColors.darkGreen,
             },
             '&.MuiButton-containedPrimary': {
-            backgroundColor: '#4caf50',
+            backgroundColor: appColors.green,
             '&:hover': {
-              backgroundColor: '#45a049',
+              backgroundColor: appColors.darkGreen,
             },
           },
           },
