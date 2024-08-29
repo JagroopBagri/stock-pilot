@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import NavBar from "@/components/NavBar/NavBar";
+import { appColors } from "@/styles/appColors";
 
 interface ThemeWrapperProps {
   children: React.ReactNode;
@@ -26,14 +27,14 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
         paper: mode === "dark" ? "#2d2d2d" : "#ffffff",
       },
       primary: {
-        main: "#4caf50", // This sets the primary color to green
+        main: appColors.green, // This sets the primary color to green
       },
     },
     components: {
       MuiButton: {
         styleOverrides: {
           root: {
-            backgroundColor: "#4caf50",
+            backgroundColor: appColors.green,
             color: "white",
             "&:hover": {
               backgroundColor: "#45a049",
@@ -49,14 +50,14 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
             },
           },
           outlined: {
-            borderColor: "#4caf50",
-            color: "#4caf50",
+            borderColor: appColors.green,
+            color: appColors.green,
             "&:hover": {
               backgroundColor: "rgba(76, 175, 80, 0.08)",
             },
           },
           contained: {
-            backgroundColor: "#4caf50",
+            backgroundColor: appColors.green,
             color: "white",
             padding: "10px 20px",
             borderRadius: " 4px",

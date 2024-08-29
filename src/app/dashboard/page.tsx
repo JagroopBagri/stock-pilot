@@ -17,6 +17,7 @@ import {
   Box,
   Modal,
   Container,
+  CircularProgress
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Decimal from 'decimal.js';
@@ -49,6 +50,7 @@ const modalStyle = {
 export default function DashboardPage() {
   const [showTradeForm, setShowTradeForm] = useState<boolean>(false);
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { user } = useContext(UserContext) as UserContextType;
 
   const toggleTradeForm = () => setShowTradeForm(!showTradeForm);
@@ -58,12 +60,15 @@ export default function DashboardPage() {
   }, []);
 
   const fetchTrades = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("/api/v1/user/trades");
       setTrades(response.data.data);
     } catch (error) {
       console.error("Failed to fetch trades:", error);
       toast.error("Failed to fetch trades");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,11 +78,11 @@ export default function DashboardPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           Dashboard
         </Typography>
-        {user && (
+        {/* {user && (
           <Typography variant="h6" gutterBottom>
             Welcome, {user.username}!
           </Typography>
-        )}
+        )} */}
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -86,7 +91,11 @@ export default function DashboardPage() {
         >
           Add Trade
         </Button>
-        {trades.length > 0 ? (
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+            <CircularProgress />  
+          </Box>
+        ) : trades.length > 0 ? (
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
@@ -113,7 +122,7 @@ export default function DashboardPage() {
                     <TableCell>{trade.type}</TableCell>
                     <TableCell align="right">{trade.quantity}</TableCell>
                     <TableCell align="right">${new Decimal(trade.price).toFixed(2)}</TableCell>
-            <TableCell align="right">${new Decimal(trade.totalAmount).toFixed(2)}</TableCell>
+                    <TableCell align="right">${new Decimal(trade.totalAmount).toFixed(2)}</TableCell>
                     <TableCell>{trade.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
