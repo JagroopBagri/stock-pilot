@@ -27,7 +27,7 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
         paper: mode === "dark" ? appColors.darkGrey : appColors.white,
       },
       primary: {
-        main: appColors.green, // This sets the primary color to green
+        main: appColors.green,
       },
     },
     components: {
@@ -41,7 +41,7 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
             },
           },
           text: {
-            color: mode === "dark" ? appColors.white : appColors.black,
+            color: mode === "dark" ? appColors.whiteSmoke : appColors.black,
             "&:hover": {
               backgroundColor:
                 mode === "dark"
@@ -74,6 +74,13 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
           },
         },
       },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            color: mode === "dark" ? appColors.whiteSmoke : appColors.black,
+          },
+        }
+      }
     },
   });
   const toggleTheme = () => {
