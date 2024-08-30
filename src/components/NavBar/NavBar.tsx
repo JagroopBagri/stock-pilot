@@ -22,6 +22,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import { appColors } from "@/styles/appColors";
 
 interface NavBarProps {
   toggleTheme: () => void;
@@ -103,7 +104,9 @@ function NavBar({ toggleTheme }: NavBarProps) {
 
   return (
     <>
-      <AppBar position="fixed">
+      <AppBar position="fixed" sx={{
+          backgroundColor: appColors.green, 
+        }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -124,7 +127,7 @@ function NavBar({ toggleTheme }: NavBarProps) {
             onClick={() => handleNavigation("/")}
           >
             <img src="/icon.png" alt="Stock Pilot Logo" style={{ width: 32, height: 32, marginRight: 8 }} />
-            <Typography variant="h6" noWrap component="div">
+            <Typography variant="h6" noWrap component="div" sx={{color: appColors.black}}>
               Stock Pilot
             </Typography>
           </Box>
@@ -133,8 +136,8 @@ function NavBar({ toggleTheme }: NavBarProps) {
               shouldShowMenuItem(item) && (
                 <Button
                   key={item.name}
-                  color="inherit"
                   onClick={() => handleNavigation(item.route)}
+                  sx={{color: appColors.black}}
                 >
                   {item.name}
                 </Button>
@@ -150,7 +153,7 @@ function NavBar({ toggleTheme }: NavBarProps) {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true, // better open performance on mobile.
           }}
           sx={{
             display: { xs: 'block', md: 'none' },
@@ -160,7 +163,7 @@ function NavBar({ toggleTheme }: NavBarProps) {
           {drawer}
         </Drawer>
       </Box>
-      <Toolbar /> {/* This empty Toolbar acts as a spacer */}
+      <Toolbar /> 
     </>
   );
 }

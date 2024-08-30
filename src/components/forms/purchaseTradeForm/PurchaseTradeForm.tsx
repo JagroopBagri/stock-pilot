@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
 import {
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
+  Autocomplete,
   Box,
-  Typography,
+  Button,
+  InputAdornment,
   Grid,
-  Autocomplete
+  TextField,
+  Typography
 } from "@mui/material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import axios from "axios";
 import dayjs, { Dayjs } from "dayjs";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface Stock {
   id: number;
@@ -101,7 +98,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("/api/v1/user/trades", {
+      await axios.post("/api/v1/user/purchase-trade", {
         stockId: selectedStock?.id || null,
         quantity,
         price,
@@ -182,11 +179,14 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label="Price per Share"
+              label="($) Price per Share"
               type="number"
               value={price}
               onChange={handlePriceChange}
               required
+              InputProps={{
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              }}
               inputProps={{
                 step: "0.01",
                 min: "0",
