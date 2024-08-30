@@ -18,14 +18,16 @@ import {
   
   interface SaleTradeFormProps {
     onClose: () => void;
-    onSaleTradeAdded: () => void;
+    onSaleTradeAdded: () => Promise<void>;
     purchaseTrade: PurchaseTrade;
+    setLoading: (bool: boolean) => void;
   }
   
   const SaleTradeForm: React.FC<SaleTradeFormProps> = ({
     onClose,
     onSaleTradeAdded,
     purchaseTrade,
+    setLoading
   }) => {
     const [quantity, setQuantity] = useState<number | "">(purchaseTrade.quantity);
     const [sellPrice, setSellPrice] = useState<string>("");
@@ -34,6 +36,8 @@ import {
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      setLoading(true);
+      onClose();
       try {
         const totalAmount = new Decimal(sellPrice).times(quantity).toFixed(2);
         const netProfit = new Decimal(sellPrice)
@@ -53,11 +57,12 @@ import {
         });
   
         toast.success("Sale trade added successfully");
-        onSaleTradeAdded();
-        onClose();
+        await onSaleTradeAdded();
       } catch (error) {
         console.error("Failed to add sale trade:", error);
         toast.error("Failed to add sale trade");
+      } finally {
+        setLoading(false);
       }
     };
   
@@ -80,7 +85,7 @@ import {
                 fullWidth
                 label="Number of shares"
                 type="number"
-                value={quantity === 0 ? purchaseTrade.quantity : quantity}
+                value={quantity}
                 onChange={(e) => {
                   const value = e.target.value;
                   setQuantity(

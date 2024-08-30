@@ -5,7 +5,7 @@ import {
   InputAdornment,
   Grid,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -23,7 +23,7 @@ interface Stock {
 
 interface PurchaseTradeFormProps {
   onClose: () => void;
-  onTradeAdded: () => void;
+  onTradeAdded: () => Promise<void>;
 }
 
 const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
@@ -50,7 +50,10 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
     setLoading(true);
     try {
       const searchToUse = newSearch !== undefined ? newSearch : searchTerm;
-      const response = await axios.get<{ data: Stock[], meta: { hasMore: boolean } }>("/api/v1/stocks", {
+      const response = await axios.get<{
+        data: Stock[];
+        meta: { hasMore: boolean };
+      }>("/api/v1/stocks", {
         params: {
           page: newSearch !== undefined ? 1 : page,
           limit: 50,
@@ -58,7 +61,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
         },
       });
       const newStocks = response.data.data;
-  
+
       setStocks((prevStocks) => {
         let updatedStocks: Stock[];
         if (newSearch !== undefined) {
@@ -68,17 +71,17 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
           // For pagination, combine previous and new stocks
           updatedStocks = [...prevStocks, ...newStocks];
         }
-  
+
         // Remove duplicates based on stock id
         const uniqueStocks = Array.from(
-          new Map(updatedStocks.map(stock => [stock.id, stock])).values()
+          new Map(updatedStocks.map((stock) => [stock.id, stock])).values()
         ) as Stock[];
-  
+
         return uniqueStocks;
       });
-  
+
       setHasMore(response.data.meta.hasMore);
-      setPage((prevPage) => newSearch !== undefined ? 2 : prevPage + 1);
+      setPage((prevPage) => (newSearch !== undefined ? 2 : prevPage + 1));
       if (newSearch !== undefined) {
         setSearchTerm(newSearch);
       }
@@ -94,7 +97,6 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
     fetchStocks(value);
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -106,7 +108,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
         notes,
       });
       toast.success("Trade added successfully");
-      onTradeAdded();
+      await onTradeAdded();
       onClose();
     } catch (error) {
       console.error("Failed to add trade:", error);
@@ -130,14 +132,16 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-          <Autocomplete
+            <Autocomplete
               options={stocks}
-              getOptionLabel={(option) => `${option.ticker} - ${option.companyName}`}
+              getOptionLabel={(option) =>
+                `${option.ticker} - ${option.companyName}`
+              }
               renderInput={(params) => (
-                <TextField 
-                  {...params} 
-                  label="Stock" 
-                  required 
+                <TextField
+                  {...params}
+                  label="Stock"
+                  required
                   placeholder="Search by company name or ticker"
                 />
               )}
@@ -185,7 +189,9 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
               onChange={handlePriceChange}
               required
               InputProps={{
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">$</InputAdornment>
+                ),
               }}
               inputProps={{
                 step: "0.01",

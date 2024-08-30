@@ -1,34 +1,41 @@
 "use client";
-import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
-import { UserContext, UserContextType } from "@/components/Store";
-import { toast } from "react-hot-toast";
 import PurchaseTradeForm from "@/components/forms/purchaseTradeForm/PurchaseTradeForm";
 import SaleTradeForm from "@/components/forms/saleTradeForm/SaleTradeForm";
+import { UserContext, UserContextType } from "@/components/Store";
+import AddIcon from "@mui/icons-material/Add";
+import SellIcon from "@mui/icons-material/Sell";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Modal,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Button,
   Typography,
-  Box,
-  Modal,
-  Container,
-  CircularProgress,
-  IconButton,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import Decimal from "decimal.js";
-import SellIcon from "@mui/icons-material/Sell";
 import {
-  Stock,
   PurchaseTrade as PrismaPurchaseTrade,
   SaleTrade as PrismaSaleTrade,
+  Stock,
 } from "@prisma/client";
+import axios from "axios";
+import Decimal from "decimal.js";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import { appColors } from "@/styles/appColors";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
@@ -58,6 +65,13 @@ export default function DashboardPage() {
   const [selectedPurchaseTrade, setSelectedPurchaseTrade] =
     useState<PurchaseTrade | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [deleteType, setDeleteType] = useState<"purchase" | "sale" | null>(
+    null
+  );
+  const [tradeToDelete, setTradeToDelete] = useState<
+    PurchaseTrade | SaleTrade | null
+  >(null);
   const { user } = useContext(UserContext) as UserContextType;
 
   const togglePurchaseTradeForm = () =>
@@ -66,6 +80,51 @@ export default function DashboardPage() {
   const openSaleTradeForm = (trade: PurchaseTrade) => {
     setSelectedPurchaseTrade(trade);
     setShowSaleTradeForm(true);
+  };
+
+  const openDeleteDialog = (
+    type: "purchase" | "sale",
+    trade: PurchaseTrade | SaleTrade
+  ) => {
+    setDeleteType(type);
+    setTradeToDelete(trade);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setTradeToDelete(null);
+    setDeleteType(null);
+  };
+
+  const handleDelete = async () => {
+    if (!tradeToDelete || !deleteType) return;
+    setLoading(true);
+    closeDeleteDialog();
+    try {
+      const url =
+        deleteType === "purchase"
+          ? `/api/v1/user/purchase-trade/${tradeToDelete.id}`
+          : `/api/v1/user/sale-trade/${tradeToDelete.id}`;
+
+      await axios.delete(url);
+
+      toast.success(
+        `${
+          deleteType === "purchase" ? "Purchase" : "Sale"
+        } trade deleted successfully`
+      );
+
+      // Refetch data
+      await fetchPurchaseTrades();
+      await fetchSaleTrades();
+    } catch (error) {
+      console.error(`Failed to delete ${deleteType} trade:`, error);
+      toast.error(`Failed to delete ${deleteType} trade`);
+    } finally {
+      closeDeleteDialog();
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -123,15 +182,15 @@ export default function DashboardPage() {
         >
           Add Trade
         </Button>
-        {/* Purchase Trades Table */}
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
             <CircularProgress />
           </Box>
         ) : (
           <>
+            {/* Purchase Trades Table */}
             <Typography variant="h6" component="h2" gutterBottom>
-              Purchased Shares
+              Currently Held Shares
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -144,6 +203,7 @@ export default function DashboardPage() {
                     <TableCell align="center">Total Spent</TableCell>
                     {/* <TableCell>Notes</TableCell> */}
                     <TableCell align="center">Sell Shares</TableCell>
+                    <TableCell align="center">Delete</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -172,18 +232,20 @@ export default function DashboardPage() {
                           <SellIcon />
                         </IconButton>
                       </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          onClick={() => openDeleteDialog("purchase", trade)}
+                          color="secondary"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
-          </>
-        )}
-        {/* Sale Trades Table */}
-        {loading ? (
-          <></>
-        ) : (
-          <>
+            {/* Sale Trades Table */}
             <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 4 }}>
               Sold Shares
             </Typography>
@@ -197,6 +259,7 @@ export default function DashboardPage() {
                     <TableCell align="center">Sell Price</TableCell>
                     <TableCell align="center">Purchase Price</TableCell>
                     <TableCell align="center">Net Profit</TableCell>
+                    <TableCell align="center">Delete</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -216,8 +279,26 @@ export default function DashboardPage() {
                       <TableCell align="center">
                         ${new Decimal(trade.buyPrice).toFixed(2)}
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        align="center"
+                        sx={{
+                          color: new Decimal(
+                            trade.netProfit
+                          ).greaterThanOrEqualTo(0)
+                            ? appColors.green
+                            : appColors.red,
+                          fontWeight: "bold",
+                        }}
+                      >
                         ${new Decimal(trade.netProfit).toFixed(2)}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          onClick={() => openDeleteDialog("sale", trade)}
+                          color="secondary"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -227,6 +308,36 @@ export default function DashboardPage() {
           </>
         )}
       </Box>
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={closeDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {`Delete ${deleteType === "purchase" ? "Purchase" : "Sale"} Trade`}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {`Are you sure you want to delete this ${
+              deleteType === "purchase" ? "purchase" : "sale"
+            } trade? ${
+              deleteType === "purchase"
+                ? "All associated sale trades will also be deleted. This action cannot be undone."
+                : "This action cannot be undone."
+            }`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="secondary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Modal
         open={showPurchaseTradeForm}
         onClose={togglePurchaseTradeForm}
@@ -251,7 +362,11 @@ export default function DashboardPage() {
             <SaleTradeForm
               purchaseTrade={selectedPurchaseTrade}
               onClose={() => setShowSaleTradeForm(false)}
-              onSaleTradeAdded={fetchSaleTrades}
+              onSaleTradeAdded={async () => {
+                await fetchPurchaseTrades();
+                await fetchSaleTrades();
+              }}
+              setLoading={setLoading}
             />
           )}
         </Box>

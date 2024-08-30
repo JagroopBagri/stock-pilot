@@ -49,9 +49,18 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = validationResp.id;
-    const { purchaseTradeId, quantity, sellPrice, totalAmount, buyPrice, netProfit, date, notes } = await req.json();
+    const {
+      purchaseTradeId,
+      quantity,
+      sellPrice,
+      totalAmount,
+      buyPrice,
+      netProfit,
+      date,
+      notes,
+    } = await req.json();
 
-    // update quantity of the purchase trade 
+    // update quantity of the purchase trade
     const purchaseTrade = await prisma.purchaseTrade.findUnique({
       where: { id: purchaseTradeId },
     });
@@ -60,24 +69,29 @@ export async function POST(req: NextRequest) {
       throw new Error("Invalid quantity");
     }
 
-    await prisma.purchaseTrade.update({
-      where: { id: purchaseTradeId },
-      data: { quantity: purchaseTrade.quantity - quantity },
-    });
+    let saleTrade;
 
-    // create the sale trade
-    const saleTrade = await prisma.saleTrade.create({
-      data: {
-        userId,
-        purchaseTradeId,
-        quantity,
-        sellPrice,
-        totalAmount,
-        buyPrice,
-        netProfit,
-        date: new Date(date),
-        notes,
-      },
+    await prisma.$transaction(async (transaction) => {
+      // subtract the quantity from the connected purchase trade
+      await transaction.purchaseTrade.update({
+        where: { id: purchaseTradeId },
+        data: { quantity: purchaseTrade.quantity - quantity },
+      });
+
+      // create the sale trade
+      saleTrade = await transaction.saleTrade.create({
+        data: {
+          userId,
+          purchaseTradeId,
+          quantity,
+          sellPrice,
+          totalAmount,
+          buyPrice,
+          netProfit,
+          date: new Date(date),
+          notes,
+        },
+      });
     });
 
     return NextResponse.json({

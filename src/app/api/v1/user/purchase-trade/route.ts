@@ -17,13 +17,16 @@ export async function GET(req: NextRequest) {
     const purchasedTrades = await prisma.purchaseTrade.findMany({
       where: {
         userId: userId,
+        quantity: {
+          gt: 0, // only retrieve purchasedTrades with a quantity greater than 0
+        },
       },
       include: {
         stock: true,
         saleTrades: true,
       },
       orderBy: {
-        date: 'desc',
+        date: "desc",
       },
     });
 
@@ -46,7 +49,14 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = validationResp.id;
-    const { stockId, quantity, price, date, notes, netProfit = 0 } = await req.json();
+    const {
+      stockId,
+      quantity,
+      price,
+      date,
+      notes,
+      netProfit = 0,
+    } = await req.json();
 
     const trade = await prisma.purchaseTrade.create({
       data: {
@@ -57,7 +67,7 @@ export async function POST(req: NextRequest) {
         totalAmount: quantity * price,
         date: new Date(date),
         notes,
-        netProfit
+        netProfit,
       },
     });
 
