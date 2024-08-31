@@ -12,8 +12,9 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import axios from "axios";
 import dayjs, { Dayjs } from "dayjs";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "react-hot-toast";
+import { CircularProgress } from "@mui/material";
 
 interface Stock {
   id: number;
@@ -40,10 +41,8 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-
-  // useEffect(() => {
-  //   fetchStocks();
-  // }, []);
+  const [inputValue, setInputValue] = useState("");
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchStocks = async (newSearch?: string) => {
     if ((!hasMore && !newSearch) || loading) return;
@@ -93,9 +92,14 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
     }
   };
 
-  const handleStockSearch = (event: React.ChangeEvent<{}>, value: string) => {
-    fetchStocks(value);
-  };
+  const debouncedFetchStocks = useCallback((value: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      fetchStocks(value);
+    }, 500);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +128,19 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
     }
   };
 
+  const handleStockSearch = (event: React.ChangeEvent<{}>, value: string) => {
+    setInputValue(value);
+    debouncedFetchStocks(value);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
@@ -143,6 +160,15 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
                   label="Stock"
                   required
                   placeholder="Search by company name or ticker"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <React.Fragment>
+                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </React.Fragment>
+                    ),
+                  }}
                 />
               )}
               value={selectedStock}
@@ -153,15 +179,6 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
               filterOptions={(x) => x}
               loadingText="Loading stocks..."
               loading={loading}
-              onScroll={(event) => {
-                const listboxNode = event.currentTarget;
-                if (
-                  listboxNode.scrollTop + listboxNode.clientHeight ===
-                  listboxNode.scrollHeight
-                ) {
-                  fetchStocks();
-                }
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
