@@ -26,6 +26,11 @@ export const menuItems: MenuItem[] = [
       name: "Purchased Shares",
       route: "/purchased-shares",
       hide: ["logged-out"],
+    },
+    {
+      name: "Sold Shares",
+      route: "/sold-shares",
+      hide: ["logged-out"],
     }],
   },
   {

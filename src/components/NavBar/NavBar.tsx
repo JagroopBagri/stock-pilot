@@ -24,6 +24,8 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { appColors } from "@/styles/appColors";
 
 interface NavBarProps {
@@ -34,9 +36,9 @@ function NavBar({ toggleTheme }: NavBarProps) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
-  const { user } = useContext(UserContext) as UserContextType;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const { user } = useContext(UserContext) as UserContextType;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -53,6 +55,19 @@ function NavBar({ toggleTheme }: NavBarProps) {
 
   const handleSubMenuToggle = (name: string) => {
     setOpenSubMenu(openSubMenu === name ? null : name);
+  };
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    name: string
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setOpenMenu(name);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setOpenMenu(null);
   };
 
   const shouldShowMenuItem = (item: MenuItem): boolean => {
@@ -73,61 +88,99 @@ function NavBar({ toggleTheme }: NavBarProps) {
         return null;
       }
 
-      const listItem = isMobile ? (
-        <ListItem
-          button
-          onClick={() =>
-            item.children
-              ? handleSubMenuToggle(item.name)
-              : handleNavigation(item.route)
-          }
-          key={item.name}
-          sx={{ pl: level * 2 }}
-        >
-          <ListItemText primary={item.name} />
-          {item?.children?.length ? (
-            openSubMenu === item.name ? (
-              <ExpandLess />
+      if (isMobile) {
+        const listItem = (
+          <ListItem
+            button
+            onClick={() =>
+              item.children
+                ? handleSubMenuToggle(item.name)
+                : handleNavigation(item.route)
+            }
+            key={item.name}
+            sx={{ pl: level * 2 }}
+          >
+            <ListItemText primary={item.name} />
+            {item?.children?.length ? (
+              openSubMenu === item.name ? (
+                <ExpandLess />
+              ) : (
+                <ExpandMore />
+              )
             ) : (
-              <ExpandMore />
-            )
-          ) : (
-            <></>
-          )}
-        </ListItem>
-      ) : (
-        <Button
-          key={item.name}
-          onClick={() => handleNavigation(item.route)}
-          onMouseOver={() => console.log("testing")}
-          onMouseLeave={() => {
-            console.log("leaving");
-          }}
-          sx={{ color: theme.palette.mode === "dark"
-            ? appColors.whiteSmoke
-            : appColors.black, marginX: "10px" }}
-        >
-          {item.name}
-        </Button>
-      );
-
-      if (item.children && item.children.length && isMobile) {
-        return (
-          <div key={item.name}>
-            {listItem}
-            <Collapse
-              in={openSubMenu === item.name}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                {renderMenuItems(item.children, isMobile, level + 1)}
-              </List>
-            </Collapse>
-          </div>
+              <></>
+            )}
+          </ListItem>
         );
-      } 
-      return listItem;
+
+        if (item.children && item.children.length) {
+          return (
+            <div key={item.name}>
+              {listItem}
+              <Collapse
+                in={openSubMenu === item.name}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {renderMenuItems(item.children, isMobile, level + 1)}
+                </List>
+              </Collapse>
+            </div>
+          );
+        }
+        return listItem;
+      } else if (!isMobile) {
+        if (item.children && item.children.length) {
+          return (
+            <div key={item.name}>
+              <Button
+                onClick={(event) => handleMenuOpen(event, item.name)}
+                sx={{
+                  color:
+                    theme.palette.mode === "dark"
+                      ? appColors.whiteSmoke
+                      : appColors.black,
+                  marginX: "25px",
+                }}
+                endIcon= {openMenu === item.name ? <ExpandLess /> : <ExpandMore />}
+              >
+                {item.name}
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                open={openMenu === item.name}
+                onClose={handleMenuClose}
+              >
+                {item.children.map((child) => (
+                  <MuiMenuItem
+                    key={child.name}
+                    onClick={() => handleNavigation(child.route)}
+                  >
+                    {child.name}
+                  </MuiMenuItem>
+                ))}
+              </Menu>
+            </div>
+          );
+        } else {
+          return (
+            <Button
+              key={item.name}
+              onClick={() => handleNavigation(item.route)}
+              sx={{
+                color:
+                  theme.palette.mode === "dark"
+                    ? appColors.whiteSmoke
+                    : appColors.black,
+                marginX: "10px",
+              }}
+            >
+              {item.name}
+            </Button>
+          );
+        }
+      }
     });
   };
 
@@ -141,7 +194,11 @@ function NavBar({ toggleTheme }: NavBarProps) {
             theme.palette.mode === "dark"
               ? appColors.charcoal
               : appColors.whiteSmoke,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'}`,
+          borderBottom: `1px solid ${
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.12)"
+              : "rgba(0, 0, 0, 0.12)"
+          }`,
         }}
       >
         <Toolbar>
@@ -170,9 +227,13 @@ function NavBar({ toggleTheme }: NavBarProps) {
               variant="h6"
               noWrap
               component="div"
-              sx={{ color: theme.palette.mode === "dark"
-                ? appColors.whiteSmoke
-                : appColors.black, fontWeight: "bold" }}
+              sx={{
+                color:
+                  theme.palette.mode === "dark"
+                    ? appColors.whiteSmoke
+                    : appColors.black,
+                fontWeight: "bold",
+              }}
             >
               Stock Pilot
             </Typography>
@@ -196,9 +257,10 @@ function NavBar({ toggleTheme }: NavBarProps) {
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: 240,
-              backgroundColor: theme.palette.mode === "dark"
-              ? appColors.charcoal
-              : appColors.whiteSmoke,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? appColors.charcoal
+                  : appColors.whiteSmoke,
             },
           }}
         >
@@ -221,9 +283,13 @@ function NavBar({ toggleTheme }: NavBarProps) {
                 variant="h6"
                 noWrap
                 component="div"
-                sx={{ color: theme.palette.mode === "dark"
-                  ? appColors.whiteSmoke
-                  : appColors.black, fontWeight: "bold" }}
+                sx={{
+                  color:
+                    theme.palette.mode === "dark"
+                      ? appColors.whiteSmoke
+                      : appColors.black,
+                  fontWeight: "bold",
+                }}
               >
                 Stock Pilot
               </Typography>

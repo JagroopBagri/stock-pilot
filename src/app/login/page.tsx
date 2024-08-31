@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { CircularProgress } from "@mui/material";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { UserContext, UserContextType } from "@/components/Store";
 import { 
   TextField, 
@@ -160,7 +160,6 @@ export default function LoginPage() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Toaster />
     </Container>
   );
 }
