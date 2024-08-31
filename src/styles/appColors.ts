@@ -6,5 +6,7 @@ export const appColors = {
     whiteSmoke: "#f5f5f5",
     charcoal: "#1e1e1e",
     darkGrey: "#2d2d2d",
-    red: "#FF4C4C"
+    red: "#FF4C4C",
+    logoLightBlue: "#82CDBB",
+    darkTurqoise: "#3aab90"
 }

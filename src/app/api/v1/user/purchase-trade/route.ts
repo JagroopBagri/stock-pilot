@@ -14,13 +14,25 @@ export async function GET(req: NextRequest) {
 
     const userId = validationResp.id;
 
-    const purchasedTrades = await prisma.purchaseTrade.findMany({
-      where: {
-        userId: userId,
-        quantity: {
-          gt: 0, // only retrieve purchasedTrades with a quantity greater than 0
-        },
+    // Extract query parameters
+    const ticker = req.nextUrl.searchParams.get("ticker");
+
+     // Build the `where` clause dynamically
+     const whereClause: any = {
+      userId: userId,
+      quantity: {
+        gt: 0, // only retrieve purchaseTrades with a quantity greater than 0
       },
+    };
+
+    if (ticker) {
+      whereClause.stock = {
+        ticker,
+      };
+    }
+
+    const purchasedTrades = await prisma.purchaseTrade.findMany({
+      where: whereClause,
       include: {
         stock: true,
         saleTrades: true,

@@ -4,24 +4,26 @@ import ToggleTheme from "../ToggleTheme";
 import { menuItems, MenuItem } from "./helpers/menuItems";
 import { useRouter } from "next/navigation";
 import { UserContext, UserContextType } from "../Store";
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Collapse, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Collapse,
   Box,
   useTheme,
-  useMediaQuery
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
+  useMediaQuery,
+  Menu,
+  MenuItem as MuiMenuItem,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { appColors } from "@/styles/appColors";
 
 interface NavBarProps {
@@ -33,8 +35,10 @@ function NavBar({ toggleTheme }: NavBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
   const { user } = useContext(UserContext) as UserContextType;
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -59,90 +63,122 @@ function NavBar({ toggleTheme }: NavBarProps) {
     }
   };
 
-  const renderMenuItems = (items: MenuItem[], isMobile: boolean = false) => {
+  const renderMenuItems = (
+    items: MenuItem[],
+    isMobile: boolean = false,
+    level: number = 1
+  ) => {
     return items.map((item) => {
       if (!shouldShowMenuItem(item)) {
         return null;
       }
 
-      const listItem = (
-        <ListItem 
-          button 
-          onClick={() => item.children ? handleSubMenuToggle(item.name) : handleNavigation(item.route)}
+      const listItem = isMobile ? (
+        <ListItem
+          button
+          onClick={() =>
+            item.children
+              ? handleSubMenuToggle(item.name)
+              : handleNavigation(item.route)
+          }
           key={item.name}
+          sx={{ pl: level * 2 }}
         >
           <ListItemText primary={item.name} />
-          {item.children && (openSubMenu === item.name ? <ExpandLess /> : <ExpandMore />)}
+          {item?.children?.length ? (
+            openSubMenu === item.name ? (
+              <ExpandLess />
+            ) : (
+              <ExpandMore />
+            )
+          ) : (
+            <></>
+          )}
         </ListItem>
+      ) : (
+        <Button
+          key={item.name}
+          onClick={() => handleNavigation(item.route)}
+          onMouseOver={() => console.log("testing")}
+          onMouseLeave={() => {
+            console.log("leaving");
+          }}
+          sx={{ color: theme.palette.mode === "dark"
+            ? appColors.whiteSmoke
+            : appColors.black, marginX: "10px" }}
+        >
+          {item.name}
+        </Button>
       );
 
-      if (item.children) {
+      if (item.children && item.children.length && isMobile) {
         return (
           <div key={item.name}>
             {listItem}
-            <Collapse in={openSubMenu === item.name} timeout="auto" unmountOnExit>
+            <Collapse
+              in={openSubMenu === item.name}
+              timeout="auto"
+              unmountOnExit
+            >
               <List component="div" disablePadding>
-                {renderMenuItems(item.children, isMobile)}
+                {renderMenuItems(item.children, isMobile, level + 1)}
               </List>
             </Collapse>
           </div>
         );
-      }
-
+      } 
       return listItem;
     });
   };
 
-  const drawer = (
-    <div>
-      <Toolbar />
-      <List>
-        {renderMenuItems(menuItems, true)}
-      </List>
-    </div>
-  );
-
   return (
     <>
-      <AppBar position="fixed" sx={{
-          backgroundColor: appColors.green, 
-        }}>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? appColors.charcoal
+              : appColors.whiteSmoke,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'}`,
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
+            sx={{ mr: 2, display: { md: "none" } }}
           >
             <MenuIcon />
           </IconButton>
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              cursor: 'pointer',
-              flexGrow: 1
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexGrow: 1,
             }}
-            onClick={() => handleNavigation("/")}
           >
-            <img src="/icon.png" alt="Stock Pilot Logo" style={{ width: 32, height: 32, marginRight: 8 }} />
-            <Typography variant="h6" noWrap component="div" sx={{color: appColors.black}}>
+            <img
+              src="/icon.png"
+              alt="Stock Pilot Logo"
+              style={{ width: 32, height: 32, marginRight: 8 }}
+            />
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ color: theme.palette.mode === "dark"
+                ? appColors.whiteSmoke
+                : appColors.black, fontWeight: "bold" }}
+            >
               Stock Pilot
             </Typography>
           </Box>
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            {menuItems.map((item) => (
-              shouldShowMenuItem(item) && (
-                <Button
-                  key={item.name}
-                  onClick={() => handleNavigation(item.route)}
-                  sx={{color: appColors.black}}
-                >
-                  {item.name}
-                </Button>
-              )
-            ))}
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            {renderMenuItems(menuItems, false, 1)}
           </Box>
           <ToggleTheme toggleTheme={toggleTheme} />
         </Toolbar>
@@ -156,14 +192,47 @@ function NavBar({ toggleTheme }: NavBarProps) {
             keepMounted: true, // better open performance on mobile.
           }}
           sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: 240,
+              backgroundColor: theme.palette.mode === "dark"
+              ? appColors.charcoal
+              : appColors.whiteSmoke,
+            },
           }}
         >
-          {drawer}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                alignSelf: "center",
+                flexGrow: 1,
+                marginY: "1.5rem",
+              }}
+            >
+              <img
+                src="/icon.png"
+                alt="Stock Pilot Logo"
+                style={{ width: 32, height: 32, marginRight: 8 }}
+              />
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ color: theme.palette.mode === "dark"
+                  ? appColors.whiteSmoke
+                  : appColors.black, fontWeight: "bold" }}
+              >
+                Stock Pilot
+              </Typography>
+            </Box>
+            <List>{renderMenuItems(menuItems, true, 1)}</List>
+          </div>
         </Drawer>
       </Box>
-      <Toolbar /> 
+      <Toolbar />
     </>
   );
 }

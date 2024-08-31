@@ -41,9 +41,9 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    fetchStocks();
-  }, []);
+  // useEffect(() => {
+  //   fetchStocks();
+  // }, []);
 
   const fetchStocks = async (newSearch?: string) => {
     if ((!hasMore && !newSearch) || loading) return;

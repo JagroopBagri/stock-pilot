@@ -24,20 +24,20 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
       mode,
       background: {
         default: mode === "dark" ? appColors.charcoal : appColors.whiteSmoke,
-        paper: mode === "dark" ? appColors.darkGrey : appColors.white,
+        paper: mode === "dark" ? appColors.charcoal : appColors.white,
       },
       primary: {
-        main: appColors.green,
+        main: appColors.logoLightBlue,
       },
     },
     components: {
       MuiButton: {
         styleOverrides: {
           root: {
-            backgroundColor: appColors.green,
+            backgroundColor: appColors.logoLightBlue,
             color: "white",
             "&:hover": {
-              backgroundColor: appColors.darkGreen,
+              backgroundColor: appColors.darkTurqoise,
             },
           },
           text: {
@@ -50,25 +50,25 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
             },
           },
           outlined: {
-            borderColor: appColors.green,
-            color: appColors.green,
+            borderColor: appColors.logoLightBlue,
+            color: appColors.logoLightBlue,
             "&:hover": {
               backgroundColor: "rgba(76, 175, 80, 0.08)",
             },
           },
           contained: {
-            backgroundColor: appColors.green,
+            backgroundColor: appColors.logoLightBlue,
             color: mode === "dark" ? appColors.black : appColors.black,
             padding: "10px 20px",
             borderRadius: " 4px",
             transition: "background-color 0.3s",
             "&:hover": {
-              backgroundColor: appColors.darkGreen,
+              backgroundColor: appColors.darkTurqoise,
             },
             '&.MuiButton-containedPrimary': {
-            backgroundColor: appColors.green,
+            backgroundColor: appColors.logoLightBlue,
             '&:hover': {
-              backgroundColor: appColors.darkGreen,
+              backgroundColor: appColors.darkTurqoise,
             },
           },
           },
