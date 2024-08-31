@@ -35,7 +35,7 @@ model PurchaseTrade {
   netProfit   Decimal     @db.Decimal(10, 2)
   date        DateTime
   notes       String?     @db.VarChar(255)
-  saleTrades  SaleTrade[]
+  saleTrades  SaleTrade[] 
   createdAt   DateTime    @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime    @updatedAt @db.Timestamptz(6)
 }
@@ -45,7 +45,7 @@ model SaleTrade {
   userId          Int
   user            User          @relation(fields: [userId], references: [id])
   purchaseTradeId Int
-  purchaseTrade   PurchaseTrade @relation(fields: [purchaseTradeId], references: [id])
+  purchaseTrade   PurchaseTrade @relation(fields: [purchaseTradeId], references: [id], onDelete: Cascade)
   quantity        Int
   sellPrice       Decimal       @db.Decimal(10, 2)
   totalAmount     Decimal       @db.Decimal(10, 2)

@@ -10,13 +10,18 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const stocks = await prisma.stock.findMany({
-      where: {
+    let whereClause = {};
+    if (search) {
+      whereClause = {
         OR: [
           { ticker: { contains: search, mode: 'insensitive' } },
           { companyName: { contains: search, mode: 'insensitive' } }
         ]
-      },
+      };
+    }
+
+    const stocks = await prisma.stock.findMany({
+      where: whereClause,
       orderBy: {
         ticker: 'asc',
       },
@@ -25,12 +30,7 @@ export async function GET(req: NextRequest) {
     });
 
     const total = await prisma.stock.count({
-      where: {
-        OR: [
-          { ticker: { contains: search, mode: 'insensitive' } },
-          { companyName: { contains: search, mode: 'insensitive' } }
-        ]
-      },
+      where: whereClause,
     });
 
     return NextResponse.json({

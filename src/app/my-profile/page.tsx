@@ -2,7 +2,7 @@
 import axios from "axios";
 import Link from "next/link";
 import React, { useState, useContext } from "react";
-import { toast, Toaster } from "react-hot-toast";
+import { toast} from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { UserContext, UserContextType } from "@/components/Store";
 import { 
@@ -91,7 +91,6 @@ export default function ProfilePage() {
           </Button>
         </Box>
       </Box>
-      <Toaster />
     </Container>
   );
 }

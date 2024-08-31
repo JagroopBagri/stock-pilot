@@ -4,19 +4,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { CircularProgress } from "@mui/material";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { UserContext, UserContextType } from "@/components/Store";
-import { 
-  TextField, 
-  Button, 
-  Typography, 
-  Container, 
-  Box, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions 
+import {
+  TextField,
+  Button,
+  Typography,
+  Container,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  useTheme,
 } from "@mui/material";
+import { appColors } from "@/styles/appColors";
 
 const defaultFormValues = { username: "", password: "" };
 
@@ -26,7 +28,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [forgotEmail, setForgotEmail] = useState<string>("");
   const [fpModalOpen, setFPModalOpen] = useState<boolean>(false);
-  const {user, setUser} = useContext(UserContext) as UserContextType;
+  const { user, setUser } = useContext(UserContext) as UserContextType;
+  const theme = useTheme();
 
   // on login submit
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -73,12 +76,22 @@ export default function LoginPage() {
       <Box
         sx={{
           marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Typography component="h1" variant="h2" sx={{ mb: 4 }}>
+        <Typography
+          component="h1"
+          variant="h2"
+          sx={{
+            mb: 4,
+            color:
+              theme.palette.mode === "dark"
+                ? appColors.logoLightBlue
+                : appColors.darkTurqoise,
+          }}
+        >
           Stock Pilot
         </Typography>
         <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}>
@@ -92,7 +105,9 @@ export default function LoginPage() {
             autoComplete="username"
             autoFocus
             value={formValues.username}
-            onChange={(e) => setFormValues({ ...formValues, username: e.target.value })}
+            onChange={(e) =>
+              setFormValues({ ...formValues, username: e.target.value })
+            }
           />
           <TextField
             margin="normal"
@@ -104,7 +119,9 @@ export default function LoginPage() {
             id="password"
             autoComplete="current-password"
             value={formValues.password}
-            onChange={(e) => setFormValues({ ...formValues, password: e.target.value })}
+            onChange={(e) =>
+              setFormValues({ ...formValues, password: e.target.value })
+            }
           />
           <Button
             type="submit"
@@ -118,13 +135,16 @@ export default function LoginPage() {
           </Button>
         </Box>
         <Link href="/sign-up" passHref>
-          <Typography variant="body2" sx={{ mt: 2, cursor: 'pointer', color: 'primary.main' }}>
+          <Typography
+            variant="body2"
+            sx={{ mt: 2, cursor: "pointer", color: "primary.main" }}
+          >
             {"Don't have an account? Sign Up"}
           </Typography>
         </Link>
-        <Typography 
-          variant="body2" 
-          sx={{ mt: 2, cursor: 'pointer', color: 'primary.main' }}
+        <Typography
+          variant="body2"
+          sx={{ mt: 2, cursor: "pointer", color: "primary.main" }}
           onClick={toggleForgotPasswordModal}
         >
           Forgot your password?
@@ -134,7 +154,9 @@ export default function LoginPage() {
       <Dialog open={fpModalOpen} onClose={toggleForgotPasswordModal}>
         <DialogTitle>Recover your account</DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2 }}>Please enter your email below</Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Please enter your email below
+          </Typography>
           <TextField
             autoFocus
             margin="dense"
@@ -151,8 +173,8 @@ export default function LoginPage() {
           <Button onClick={toggleForgotPasswordModal} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={() => onForgotPasswordSubmit(forgotEmail)} 
+          <Button
+            onClick={() => onForgotPasswordSubmit(forgotEmail)}
             color="primary"
             disabled={loading}
           >
@@ -160,7 +182,6 @@ export default function LoginPage() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Toaster />
     </Container>
   );
 }

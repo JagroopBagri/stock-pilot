@@ -4,15 +4,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CircularProgress } from "@mui/material";
 import axios from "axios";
-import { 
-  TextField, 
-  Button, 
-  Typography, 
-  Container, 
+import {
+  TextField,
+  Button,
+  Typography,
+  Container,
   Box,
-  Grid
+  Grid,
+  useTheme,
 } from "@mui/material";
 import { toast } from "react-hot-toast";
+import { appColors } from "@/styles/appColors";
 
 const Page = () => {
   const router = useRouter();
@@ -25,6 +27,7 @@ const Page = () => {
     username: "",
     isVerified: false,
   });
+  const theme = useTheme();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,12 +50,22 @@ const Page = () => {
       <Box
         sx={{
           marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Typography component="h1" variant="h4" sx={{ my: 4 }}>
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{
+            my: 4,
+            color:
+              theme.palette.mode === "dark"
+                ? appColors.logoLightBlue
+                : appColors.darkTurqoise,
+          }}
+        >
           Sign Up
         </Typography>
         <Box component="form" onSubmit={onSubmit} sx={{ mt: 3 }}>
@@ -67,7 +80,9 @@ const Page = () => {
                 label="First Name"
                 autoFocus
                 value={user.firstName}
-                onChange={(e) => setUser({...user, firstName: e.target.value })}
+                onChange={(e) =>
+                  setUser({ ...user, firstName: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -79,7 +94,7 @@ const Page = () => {
                 name="lastName"
                 autoComplete="family-name"
                 value={user.lastName}
-                onChange={(e) => setUser({...user, lastName: e.target.value })}
+                onChange={(e) => setUser({ ...user, lastName: e.target.value })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -91,7 +106,7 @@ const Page = () => {
                 name="username"
                 autoComplete="username"
                 value={user.username}
-                onChange={(e) => setUser({...user, username: e.target.value })}
+                onChange={(e) => setUser({ ...user, username: e.target.value })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -103,7 +118,7 @@ const Page = () => {
                 name="email"
                 autoComplete="email"
                 value={user.email}
-                onChange={(e) => setUser({...user, email: e.target.value })}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -116,7 +131,7 @@ const Page = () => {
                 id="password"
                 autoComplete="new-password"
                 value={user.password}
-                onChange={(e) => setUser({...user, password: e.target.value })}
+                onChange={(e) => setUser({ ...user, password: e.target.value })}
               />
             </Grid>
           </Grid>
@@ -132,7 +147,10 @@ const Page = () => {
           <Grid container justifyContent="flex-end">
             <Grid item>
               <Link href="/login" passHref>
-                <Typography variant="body2" sx={{ cursor: 'pointer', color: 'primary.main' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ cursor: "pointer", color: "primary.main" }}
+                >
                   Already have an account? Login
                 </Typography>
               </Link>

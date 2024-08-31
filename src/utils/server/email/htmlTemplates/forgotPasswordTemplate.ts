@@ -39,20 +39,24 @@ const createForgotPasswordHTMLTemplate = (firstName: string, resetPasswordLink: 
           margin: 20px auto;
           padding: 10px;
           text-align: center;
-          background-color: #0061a8;
+          background-color: #3aab90;
           color: #ffffff;
           border: none;
           border-radius: 5px;
           text-decoration: none;
         }
         .button:hover {
-          background-color: #004885;
+          background-color: #82CDBB;
         }
         h1 {
-          color: #0061a8;
+          color: #3aab90;
         }
         p {
           margin: 10px 0;
+        }
+
+        a {
+        color: #ffffff !important;
         }
       </style>
     </head>
@@ -60,7 +64,7 @@ const createForgotPasswordHTMLTemplate = (firstName: string, resetPasswordLink: 
       <div class="container">
         <h1>Password Reset Request</h1>
         <p>Hello ${firstName},</p>
-        <p>You recently requested to reset your password for your Stock Pilot account. Click the button below to reset it:</p>
+        <p>You recently requested to reset the password to your Stock Pilot account. Click the button below to reset it:</p>
         <a href="${resetPasswordLink}" class="button">Reset Your Password</a>
         <p>If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
         <p>Thanks,<br>The Stock Pilot Team</p>

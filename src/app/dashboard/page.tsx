@@ -1,34 +1,33 @@
 "use client";
-import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { UserContext, UserContextType } from "@/components/Store";
-import { toast } from "react-hot-toast";
-import PurchaseTradeForm from "@/components/forms/purchaseTradeForm/PurchaseTradeForm";
-import SaleTradeForm from "@/components/forms/saleTradeForm/SaleTradeForm";
+import { appColors } from "@/styles/appColors";
+import AddIcon from "@mui/icons-material/Add";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Button,
-  Typography,
-  Box,
-  Modal,
-  Container,
-  CircularProgress,
-  IconButton,
+  Typography
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import Decimal from "decimal.js";
-import SellIcon from "@mui/icons-material/Sell";
 import {
-  Stock,
   PurchaseTrade as PrismaPurchaseTrade,
   SaleTrade as PrismaSaleTrade,
+  Stock,
 } from "@prisma/client";
+import axios from "axios";
+import Decimal from "decimal.js";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
@@ -38,35 +37,35 @@ interface SaleTrade extends PrismaSaleTrade {
   purchaseTrade: PurchaseTrade;
 }
 
-const modalStyle = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  p: 4,
-};
+interface AggregatedPurchaseStocks {
+  ticker: string;
+  totalAmount: Decimal;
+  totalShares: number;
+}
+
+interface AggregatedSaleStocks {
+  ticker: string;
+  netProfit: Decimal;
+  totalSharesSold: number;
+}
 
 export default function DashboardPage() {
   const [showPurchaseTradeForm, setShowPurchaseTradeForm] =
     useState<boolean>(false);
   const [purchaseTrades, setPurchaseTrades] = useState<PurchaseTrade[]>([]);
   const [saleTrades, setSaleTrades] = useState<SaleTrade[]>([]);
-  const [showSaleTradeForm, setShowSaleTradeForm] = useState<boolean>(false);
-  const [selectedPurchaseTrade, setSelectedPurchaseTrade] =
-    useState<PurchaseTrade | null>(null);
+  const [aggregatedPurchaseStocks, setAggregatedPurchaseStocks] = useState<
+    AggregatedPurchaseStocks[]
+  >([]);
+  const [aggregatedSaleStocks, setAggregatedSaleStocks] = useState<
+    AggregatedSaleStocks[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useContext(UserContext) as UserContextType;
+  const router = useRouter();
 
   const togglePurchaseTradeForm = () =>
     setShowPurchaseTradeForm(!showPurchaseTradeForm);
-
-  const openSaleTradeForm = (trade: PurchaseTrade) => {
-    setSelectedPurchaseTrade(trade);
-    setShowSaleTradeForm(true);
-  };
 
   useEffect(() => {
     fetchPurchaseTrades();
@@ -77,7 +76,28 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const response = await axios.get("/api/v1/user/purchase-trade");
-      setPurchaseTrades(response.data.data);
+      const trades: PurchaseTrade[] = response.data.data;
+      setPurchaseTrades(trades);
+
+      // Aggregate by stock
+      const aggregated: Record<string, AggregatedPurchaseStocks> =
+        trades.reduce((acc, trade) => {
+          const { ticker } = trade.stock;
+          if (!acc[ticker]) {
+            acc[ticker] = {
+              ticker,
+              totalAmount: new Decimal(0),
+              totalShares: 0,
+            };
+          }
+          acc[ticker].totalAmount = acc[ticker].totalAmount.plus(
+            trade.totalAmount
+          );
+          acc[ticker].totalShares += trade.quantity;
+          return acc;
+        }, {} as Record<string, AggregatedPurchaseStocks>);
+
+      setAggregatedPurchaseStocks(Object.values(aggregated));
     } catch (error) {
       console.error("Failed to fetch trades:", error);
       toast.error("Failed to fetch trades");
@@ -90,13 +110,39 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const response = await axios.get("/api/v1/user/sale-trade");
-      setSaleTrades(response.data.data);
+      const trades: SaleTrade[] = response.data.data;
+      setSaleTrades(trades);
+
+      // Aggregate by stock
+      const aggregated: Record<string, AggregatedSaleStocks> = trades.reduce(
+        (acc: any, trade) => {
+          const { ticker } = trade.purchaseTrade.stock;
+          if (!acc[ticker]) {
+            acc[ticker] = {
+              ticker,
+              netProfit: new Decimal(0),
+              totalSharesSold: 0,
+            };
+          }
+          acc[ticker].netProfit = acc[ticker].netProfit.plus(trade.netProfit);
+          acc[ticker].totalSharesSold += trade.quantity;
+          return acc;
+        },
+        {} as Record<string, AggregatedSaleStocks>
+      );
+
+      setAggregatedSaleStocks(Object.values(aggregated));
     } catch (error) {
       console.error("Failed to fetch sale trades:", error);
       toast.error("Failed to fetch sale trades");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRowClick = (ticker: string) => {
+    // Navigate to the stock detail page
+    router.push(`/stocks/${ticker}`);
   };
 
   return (
@@ -123,101 +169,88 @@ export default function DashboardPage() {
         >
           Add Trade
         </Button>
-        {/* Purchase Trades Table */}
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
             <CircularProgress />
           </Box>
         ) : (
           <>
+            {/* Aggregated Purchase Stocks Table */}
             <Typography variant="h6" component="h2" gutterBottom>
-              Purchased Shares
+              Currently Held Shares
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Purchase Date</TableCell>
-                    <TableCell>Stock</TableCell>
-                    <TableCell align="center"># of Shares</TableCell>
-                    <TableCell align="center">Price per Share</TableCell>
+                    <TableCell align="left">View Details</TableCell>
+                    <TableCell align="left">Stock</TableCell>
+                    <TableCell align="center"># of Shares Held</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
-                    {/* <TableCell>Notes</TableCell> */}
-                    <TableCell align="center">Sell Shares</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {purchaseTrades.map((trade) => (
+                  {aggregatedPurchaseStocks.map((stock) => (
                     <TableRow
-                      key={trade.id}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                      key={stock.ticker}
                     >
-                      <TableCell component="th" scope="row">
-                        {new Date(trade.date).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>{`${trade.stock.ticker}`}</TableCell>
-                      <TableCell align="center">{trade.quantity}</TableCell>
-                      <TableCell align="center">
-                        ${new Decimal(trade.price).toFixed(2)}
-                      </TableCell>
-                      <TableCell align="center">
-                        ${new Decimal(trade.totalAmount).toFixed(2)}
-                      </TableCell>
-                      {/* <TableCell>{trade.notes || "-"}</TableCell> */}
-                      <TableCell align="center">
+                      <TableCell align="left">
                         <IconButton
-                          onClick={() => openSaleTradeForm(trade)}
+                          onClick={() => handleRowClick(stock.ticker)}
                           color="primary"
                         >
-                          <SellIcon />
+                          <VisibilityIcon />
                         </IconButton>
+                      </TableCell>
+                      <TableCell align="left">{stock.ticker}</TableCell>
+                      <TableCell align="center">{stock.totalShares}</TableCell>
+                      <TableCell align="center">
+                        ${new Decimal(stock.totalAmount).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
-          </>
-        )}
-        {/* Sale Trades Table */}
-        {loading ? (
-          <></>
-        ) : (
-          <>
-            <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 4 }}>
+
+            {/* Aggregated Sale Stocks Table */}
+            <Typography variant="h6" component="h2" gutterBottom>
               Sold Shares
             </Typography>
             <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }} aria-label="sale trades table">
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Sale Date</TableCell>
-                    <TableCell>Stock</TableCell>
-                    <TableCell align="center"># of Shares</TableCell>
-                    <TableCell align="center">Sell Price</TableCell>
-                    <TableCell align="center">Purchase Price</TableCell>
-                    <TableCell align="center">Net Profit</TableCell>
+                    <TableCell align="left">View Details</TableCell>
+                    <TableCell align="left">Stock</TableCell>
+                    <TableCell align="center"># of Shares Sold</TableCell>
+                    <TableCell align="center">Total Profit</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {saleTrades.map((trade) => (
+                  {aggregatedSaleStocks.map((stock) => (
                     <TableRow
-                      key={trade.id}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                      key={stock.ticker}
                     >
-                      <TableCell component="th" scope="row">
-                        {new Date(trade.date).toLocaleDateString()}
+                      <TableCell align="left">
+                        <IconButton
+                          onClick={() => handleRowClick(stock.ticker)}
+                          color="primary"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
                       </TableCell>
-                      <TableCell>{`${trade.purchaseTrade.stock.ticker}`}</TableCell>
-                      <TableCell align="center">{trade.quantity}</TableCell>
-                      <TableCell align="center">
-                        ${new Decimal(trade.sellPrice).toFixed(2)}
-                      </TableCell>
-                      <TableCell align="center">
-                        ${new Decimal(trade.buyPrice).toFixed(2)}
-                      </TableCell>
-                      <TableCell align="center">
-                        ${new Decimal(trade.netProfit).toFixed(2)}
+                      <TableCell align="left">{stock.ticker}</TableCell>
+                      <TableCell align="center">{stock.totalSharesSold}</TableCell>
+                      <TableCell align="center" sx={{
+                          color: new Decimal(
+                            stock.netProfit
+                          ).greaterThanOrEqualTo(0)
+                            ? appColors.green
+                            : appColors.red,
+                          fontWeight: "bold",
+                        }}>
+                        ${new Decimal(stock.netProfit).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -227,35 +260,6 @@ export default function DashboardPage() {
           </>
         )}
       </Box>
-      <Modal
-        open={showPurchaseTradeForm}
-        onClose={togglePurchaseTradeForm}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={modalStyle}>
-          <PurchaseTradeForm
-            onClose={togglePurchaseTradeForm}
-            onTradeAdded={fetchPurchaseTrades}
-          />
-        </Box>
-      </Modal>
-      <Modal
-        open={showSaleTradeForm}
-        onClose={() => setShowSaleTradeForm(false)}
-        aria-labelledby="sale-trade-modal-title"
-        aria-describedby="sale-trade-modal-description"
-      >
-        <Box sx={modalStyle}>
-          {selectedPurchaseTrade && (
-            <SaleTradeForm
-              purchaseTrade={selectedPurchaseTrade}
-              onClose={() => setShowSaleTradeForm(false)}
-              onSaleTradeAdded={fetchSaleTrades}
-            />
-          )}
-        </Box>
-      </Modal>
     </Container>
   );
 }

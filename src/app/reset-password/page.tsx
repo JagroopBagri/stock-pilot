@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { CircularProgress } from "@mui/material";
-import { toast, Toaster } from "react-hot-toast";
+import { toast} from "react-hot-toast";
 import { 
   TextField, 
   Button, 
@@ -93,7 +93,6 @@ export default function ResetPasswordPage() {
           </Link>
         </Box>
       </Box>
-      <Toaster />
     </Container>
   );
 }
