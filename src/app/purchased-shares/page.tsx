@@ -6,39 +6,37 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SellIcon from "@mui/icons-material/Sell";
 import {
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    IconButton,
-    Modal,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
 } from "@mui/material";
-import {
-    PurchaseTrade as PrismaPurchaseTrade,
-    Stock,
-} from "@prisma/client";
+import { PurchaseTrade as PrismaPurchaseTrade, Stock } from "@prisma/client";
 import axios from "axios";
 import Decimal from "decimal.js";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useRouter } from "next/navigation";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
 }
-
 
 const modalStyle = {
   position: "absolute" as "absolute",
@@ -63,10 +61,11 @@ export default function PurchasedSharesPage() {
   const [deleteType, setDeleteType] = useState<"purchase" | "sale" | null>(
     null
   );
-  const [tradeToDelete, setTradeToDelete] = useState<
-    PurchaseTrade | null
-  >(null);
+  const [tradeToDelete, setTradeToDelete] = useState<PurchaseTrade | null>(
+    null
+  );
   const { user } = useContext(UserContext) as UserContextType;
+  const router = useRouter();
 
   const togglePurchaseTradeForm = () =>
     setShowPurchaseTradeForm(!showPurchaseTradeForm);
@@ -138,6 +137,11 @@ export default function PurchasedSharesPage() {
     }
   };
 
+  const handleRowClick = (ticker: string) => {
+    // Navigate to the stock detail page
+    router.push(`/stocks/${ticker}`);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box>
@@ -176,12 +180,12 @@ export default function PurchasedSharesPage() {
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
+                    <TableCell align="left">View Details</TableCell>
                     <TableCell>Purchase Date</TableCell>
                     <TableCell>Stock</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Price per Share</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
-                    {/* <TableCell>Notes</TableCell> */}
                     <TableCell align="center">Sell Shares</TableCell>
                     <TableCell align="center">Delete</TableCell>
                   </TableRow>
@@ -192,6 +196,14 @@ export default function PurchasedSharesPage() {
                       key={trade.id}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
+                      <TableCell align="left">
+                        <IconButton
+                          onClick={() => handleRowClick(trade.stock.ticker)}
+                          color="primary"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </TableCell>
                       <TableCell component="th" scope="row">
                         {new Date(trade.date).toLocaleDateString()}
                       </TableCell>
@@ -203,7 +215,6 @@ export default function PurchasedSharesPage() {
                       <TableCell align="center">
                         ${new Decimal(trade.totalAmount).toFixed(2)}
                       </TableCell>
-                      {/* <TableCell>{trade.notes || "-"}</TableCell> */}
                       <TableCell align="center">
                         <IconButton
                           onClick={() => openSaleTradeForm(trade)}
