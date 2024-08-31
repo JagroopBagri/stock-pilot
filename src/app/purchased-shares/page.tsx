@@ -51,7 +51,7 @@ const modalStyle = {
   p: 4,
 };
 
-export default function DashboardPage() {
+export default function PurchasedSharesPage() {
   const [showPurchaseTradeForm, setShowPurchaseTradeForm] =
     useState<boolean>(false);
   const [purchaseTrades, setPurchaseTrades] = useState<PurchaseTrade[]>([]);

@@ -5,26 +5,28 @@ import { useParams } from "next/navigation";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SellIcon from "@mui/icons-material/Sell";
+import Link from "next/link";
 import {
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    IconButton,
-    Modal,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
+  Box,
+  Button,
+  Breadcrumbs,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
 } from "@mui/material";
 import axios from "axios";
 import Decimal from "decimal.js";
@@ -38,15 +40,15 @@ interface PurchaseTrade extends PrismaPurchaseTrade {
 }
 
 const modalStyle = {
-    position: "absolute" as "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-  };
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
+};
 
 export default function StockDetailPage() {
   const [purchaseTrades, setPurchaseTrades] = useState<PurchaseTrade[]>([]);
@@ -60,9 +62,9 @@ export default function StockDetailPage() {
   const [deleteType, setDeleteType] = useState<"purchase" | "sale" | null>(
     null
   );
-  const [tradeToDelete, setTradeToDelete] = useState<
-    PurchaseTrade | null
-  >(null);
+  const [tradeToDelete, setTradeToDelete] = useState<PurchaseTrade | null>(
+    null
+  );
   const { ticker } = useParams();
 
   const togglePurchaseTradeForm = () =>
@@ -138,6 +140,21 @@ export default function StockDetailPage() {
 
   return (
     <Container maxWidth="lg">
+      <Box sx={{ mb: 4 }}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link href="/dashboard" passHref>
+            <Typography color="inherit" sx={{ textDecoration: 'underline', cursor: 'pointer' }}>
+              Dashboard
+            </Typography>
+          </Link>
+          <Link href="/stocks" passHref>
+            <Typography color="inherit" sx={{ textDecoration: 'underline', cursor: 'pointer' }}>
+              Stocks
+            </Typography>
+          </Link>
+          <Typography color="text.primary">{ticker}</Typography>
+        </Breadcrumbs>
+      </Box>
       <Box>
         <Typography
           variant="h3"
