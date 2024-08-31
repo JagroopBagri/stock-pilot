@@ -24,8 +24,6 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { appColors } from "@/styles/appColors";
 
 interface NavBarProps {
@@ -230,8 +228,8 @@ function NavBar({ toggleTheme }: NavBarProps) {
               sx={{
                 color:
                   theme.palette.mode === "dark"
-                    ? appColors.whiteSmoke
-                    : appColors.black,
+                    ? appColors.logoLightBlue
+                    : appColors.darkTurqoise,
                 fontWeight: "bold",
               }}
             >
@@ -286,8 +284,8 @@ function NavBar({ toggleTheme }: NavBarProps) {
                 sx={{
                   color:
                     theme.palette.mode === "dark"
-                      ? appColors.whiteSmoke
-                      : appColors.black,
+                    ? appColors.logoLightBlue
+                    : appColors.darkTurqoise,
                   fontWeight: "bold",
                 }}
               >

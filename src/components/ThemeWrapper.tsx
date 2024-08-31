@@ -79,6 +79,12 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
           root: {
             color: mode === "dark" ? appColors.whiteSmoke : appColors.black,
           },
+          // h1: { color: mode === "dark" ? appColors.logoLightBlue : appColors.darkTurqoise },
+          // h2: { color: mode === "dark" ? appColors.logoLightBlue : appColors.darkTurqoise },
+          // h3: { color: mode === "dark" ? appColors.logoLightBlue : appColors.darkTurqoise },
+          // h4: { color: mode === "dark" ? appColors.logoLightBlue : appColors.darkTurqoise },
+          // h5: { color: mode === "dark" ? appColors.logoLightBlue : appColors.darkTurqoise },
+          // h6: { color: mode === "dark" ? appColors.logoLightBlue : appColors.darkTurqoise },
         }
       }
     },

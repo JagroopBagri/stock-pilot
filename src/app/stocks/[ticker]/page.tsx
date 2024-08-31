@@ -167,7 +167,7 @@ export default function StockDetailPage() {
             textUnderlineOffset: "3px",
           }}
         >
-          {ticker} - Stock Details
+           {ticker}
         </Typography>
         <Button
           variant="contained"
