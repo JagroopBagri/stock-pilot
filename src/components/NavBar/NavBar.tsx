@@ -36,7 +36,7 @@ function NavBar({ toggleTheme }: NavBarProps) {
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const { user } = useContext(UserContext) as UserContextType;
+  const { user, isLoadingUser } = useContext(UserContext) as UserContextType;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -82,7 +82,7 @@ function NavBar({ toggleTheme }: NavBarProps) {
     level: number = 1
   ) => {
     return items.map((item) => {
-      if (!shouldShowMenuItem(item)) {
+      if (!shouldShowMenuItem(item) || isLoadingUser) {
         return null;
       }
 
@@ -219,7 +219,8 @@ function NavBar({ toggleTheme }: NavBarProps) {
             <img
               src="/icon.png"
               alt="Stock Pilot Logo"
-              style={{ width: 32, height: 32, marginRight: 8 }}
+              style={{ width: 32, height: 32, marginRight: 8, cursor: "pointer" }}
+              onClick={() => {router.push("/dashboard")}}
             />
             <Typography
               variant="h6"
@@ -231,7 +232,9 @@ function NavBar({ toggleTheme }: NavBarProps) {
                     ? appColors.logoLightBlue
                     : appColors.darkTurqoise,
                 fontWeight: "bold",
+                cursor: "pointer"
               }}
+              onClick={() => {router.push("/dashboard")}}
             >
               Stock Pilot
             </Typography>

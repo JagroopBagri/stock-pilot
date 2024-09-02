@@ -30,13 +30,18 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Decimal from "decimal.js";
-import { PurchaseTrade as PrismaPurchaseTrade, Stock } from "@prisma/client";
+import { PurchaseTrade as PrismaPurchaseTrade, SaleTrade as PrismaSaleTrade, Stock } from "@prisma/client";
 import { toast } from "react-hot-toast";
 import PurchaseTradeForm from "@/components/forms/purchaseTradeForm/PurchaseTradeForm";
 import SaleTradeForm from "@/components/forms/saleTradeForm/SaleTradeForm";
+import { appColors } from "@/styles/appColors";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
+}
+
+interface SaleTrade extends PrismaSaleTrade {
+  purchaseTrade: PurchaseTrade;
 }
 
 const modalStyle = {
@@ -50,19 +55,22 @@ const modalStyle = {
   p: 4,
 };
 
+const styles = {
+  tableTitle: {marginTop: "3rem"}
+}
+
 export default function StockDetailPage() {
   const [purchaseTrades, setPurchaseTrades] = useState<PurchaseTrade[]>([]);
-  const [showPurchaseTradeForm, setShowPurchaseTradeForm] =
-    useState<boolean>(false);
+  const [saleTrades, setSaleTrades] = useState<SaleTrade[]>([]);
+  const [showPurchaseTradeForm, setShowPurchaseTradeForm] = useState<boolean>(false);
   const [showSaleTradeForm, setShowSaleTradeForm] = useState<boolean>(false);
-  const [selectedPurchaseTrade, setSelectedPurchaseTrade] =
-    useState<PurchaseTrade | null>(null);
+  const [selectedPurchaseTrade, setSelectedPurchaseTrade] = useState<PurchaseTrade | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [deleteType, setDeleteType] = useState<"purchase" | "sale" | null>(
     null
   );
-  const [tradeToDelete, setTradeToDelete] = useState<PurchaseTrade | null>(
+  const [tradeToDelete, setTradeToDelete] = useState<PurchaseTrade | SaleTrade | null>(
     null
   );
   const { ticker } = useParams();
@@ -77,7 +85,7 @@ export default function StockDetailPage() {
 
   const openDeleteDialog = (
     type: "purchase" | "sale",
-    trade: PurchaseTrade
+    trade: PurchaseTrade | SaleTrade
   ) => {
     setDeleteType(type);
     setTradeToDelete(trade);
@@ -109,7 +117,8 @@ export default function StockDetailPage() {
       );
 
       // Refetch data
-      await fetchStockDetails();
+      await fetchPurchaseTrades();
+      await fetchSaleTrades();
     } catch (error) {
       console.error(`Failed to delete ${deleteType} trade:`, error);
       toast.error(`Failed to delete ${deleteType} trade`);
@@ -119,7 +128,7 @@ export default function StockDetailPage() {
     }
   };
 
-  const fetchStockDetails = async () => {
+  const fetchPurchaseTrades = async () => {
     setLoading(true);
     try {
       const response = await axios.get(
@@ -134,8 +143,23 @@ export default function StockDetailPage() {
     }
   };
 
+  const fetchSaleTrades = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/v1/user/sale-trade?ticker=${ticker}`);
+      const trades: SaleTrade[] = response.data.data;
+      setSaleTrades(trades);
+    } catch (error) {
+      console.error("Failed to fetch sale trades:", error);
+      toast.error("Failed to fetch sale trades");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchStockDetails();
+    fetchPurchaseTrades();
+    fetchSaleTrades();
   }, [ticker]);
 
   return (
@@ -184,7 +208,7 @@ export default function StockDetailPage() {
         ) : (
           <>
             {/* Purchase Trades Table */}
-            <Typography variant="h6" component="h2" gutterBottom>
+            <Typography variant="h6" component="h2" gutterBottom sx={styles.tableTitle}>
               Currently Held {ticker} Shares
             </Typography>
             <TableContainer component={Paper}>
@@ -196,7 +220,6 @@ export default function StockDetailPage() {
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Price per Share</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
-                    {/* <TableCell>Notes</TableCell> */}
                     <TableCell align="center">Sell Shares</TableCell>
                     <TableCell align="center">Delete</TableCell>
                   </TableRow>
@@ -218,7 +241,6 @@ export default function StockDetailPage() {
                       <TableCell align="center">
                         ${new Decimal(trade.totalAmount).toFixed(2)}
                       </TableCell>
-                      {/* <TableCell>{trade.notes || "-"}</TableCell> */}
                       <TableCell align="center">
                         <IconButton
                           onClick={() => openSaleTradeForm(trade)}
@@ -230,6 +252,66 @@ export default function StockDetailPage() {
                       <TableCell align="center">
                         <IconButton
                           onClick={() => openDeleteDialog("purchase", trade)}
+                          color="secondary"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            {/* Sale Trades Table */}
+            <Typography variant="h6" component="h2" gutterBottom sx={styles.tableTitle}>
+              Sold Shares
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="sale trades table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Sale Date</TableCell>
+                    <TableCell>Stock</TableCell>
+                    <TableCell align="center"># of Shares</TableCell>
+                    <TableCell align="center">Sell Price</TableCell>
+                    <TableCell align="center">Purchase Price</TableCell>
+                    <TableCell align="center">Net Profit</TableCell>
+                    <TableCell align="center">Delete</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {saleTrades.map((trade) => (
+                    <TableRow
+                      key={trade.id}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {new Date(trade.date).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{`${trade.purchaseTrade.stock.ticker}`}</TableCell>
+                      <TableCell align="center">{trade.quantity}</TableCell>
+                      <TableCell align="center">
+                        ${new Decimal(trade.sellPrice).toFixed(2)}
+                      </TableCell>
+                      <TableCell align="center">
+                        ${new Decimal(trade.buyPrice).toFixed(2)}
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          color: new Decimal(
+                            trade.netProfit
+                          ).greaterThanOrEqualTo(0)
+                            ? appColors.green
+                            : appColors.red,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ${new Decimal(trade.netProfit).toFixed(2)}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          onClick={() => openDeleteDialog("sale", trade)}
                           color="secondary"
                         >
                           <DeleteIcon />
@@ -282,7 +364,7 @@ export default function StockDetailPage() {
         <Box sx={modalStyle}>
           <PurchaseTradeForm
             onClose={togglePurchaseTradeForm}
-            onTradeAdded={fetchStockDetails}
+            onTradeAdded={fetchPurchaseTrades}
           />
         </Box>
       </Modal>
@@ -298,7 +380,8 @@ export default function StockDetailPage() {
               purchaseTrade={selectedPurchaseTrade}
               onClose={() => setShowSaleTradeForm(false)}
               onSaleTradeAdded={async () => {
-                await fetchStockDetails();
+                await fetchPurchaseTrades();
+                await fetchSaleTrades();
               }}
               setLoading={setLoading}
             />
