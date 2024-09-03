@@ -59,7 +59,7 @@ const SoldSharesTable: React.FC<SoldSharesTableProps> = ({
                 ${new Decimal(trade.sellPrice).toFixed(2)}
               </TableCell>
               <TableCell align="center">
-                ${new Decimal(trade.buyPrice).toFixed(2)}
+                ${new Decimal(trade.purchaseTrade.price).toFixed(2)}
               </TableCell>
               <TableCell
                 align="center"
