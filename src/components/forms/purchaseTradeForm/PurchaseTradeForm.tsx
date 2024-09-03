@@ -15,6 +15,11 @@ import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
+import { PurchaseTrade as PrismaPurchaseTrade, Stock as PrismaStock } from "@prisma/client";
+
+interface PurchaseTrade extends PrismaPurchaseTrade {
+  stock: PrismaStock;
+}
 
 interface Stock {
   id: number;
@@ -25,18 +30,20 @@ interface Stock {
 interface PurchaseTradeFormProps {
   onClose: () => void;
   onTradeAdded: () => Promise<void>;
+  purchaseTrade?: PurchaseTrade | null;
 }
 
 const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   onClose,
   onTradeAdded,
+  purchaseTrade,
 }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
-  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
-  const [quantity, setQuantity] = useState<number | "">(0);
-  const [price, setPrice] = useState<string>("");
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(purchaseTrade?.stock || null);
+  const [quantity, setQuantity] = useState<number | "">(purchaseTrade?.quantity || 0);
+  const [price, setPrice] = useState<string>(purchaseTrade?.price?.toString() || "");
   const [date, setDate] = useState<Dayjs | null>(dayjs());
-  const [notes, setNotes] = useState<string>("");
+  const [notes, setNotes] = useState<string>(purchaseTrade?.notes || "");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -104,19 +111,29 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("/api/v1/user/purchase-trade", {
-        stockId: selectedStock?.id || null,
-        quantity,
-        price,
-        date: date ? date.format("YYYY-MM-DD") : null,
-        notes,
+      const url = purchaseTrade
+        ? `/api/v1/user/purchase-trade/${purchaseTrade.id}`
+        : "/api/v1/user/purchase-trade";
+
+      const method = purchaseTrade ? "PUT" : "POST";
+
+      await axios({
+        method,
+        url,
+        data: {
+          stockId: selectedStock?.id || null,
+          quantity,
+          price,
+          date: date ? date.format("YYYY-MM-DD") : null,
+          notes,
+        },
       });
-      toast.success("Trade added successfully");
+      toast.success(`Trade ${purchaseTrade ? "edited" : "added"} successfully`);
       await onTradeAdded();
       onClose();
     } catch (error) {
-      console.error("Failed to add trade:", error);
-      toast.error("Failed to add trade");
+      console.error(`Failed to ${purchaseTrade ? "edit" : "add"} trade:`, error);
+      toast.error(`Failed to ${purchaseTrade ? "edit" : "add"} trade`);
     }
   };
 
@@ -164,7 +181,9 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
                     ...params.InputProps,
                     endAdornment: (
                       <React.Fragment>
-                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {loading ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
                         {params.InputProps.endAdornment}
                       </React.Fragment>
                     ),

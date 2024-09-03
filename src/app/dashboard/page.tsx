@@ -16,7 +16,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
+  Modal
 } from "@mui/material";
 import {
   PurchaseTrade as PrismaPurchaseTrade,
@@ -28,6 +29,7 @@ import Decimal from "decimal.js";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import PurchaseTradeForm from "@/components/forms/purchaseTradeForm/PurchaseTradeForm";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
@@ -48,6 +50,27 @@ interface AggregatedSaleStocks {
   netProfit: Decimal;
   totalSharesSold: number;
 }
+
+const styles = {
+  tableTitle: {marginTop: "3rem"},
+  modalStyle: {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    p: 4,
+  },
+  tableRow: {
+    "&:hover": {
+      backgroundColor: "rgba(0, 0, 0, 0.04)",
+      cursor: "pointer",
+    },
+  },
+}
+
 
 export default function DashboardPage() {
   const [showPurchaseTradeForm, setShowPurchaseTradeForm] =
@@ -176,8 +199,8 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Aggregated Purchase Stocks Table */}
-            <Typography variant="h6" component="h2" gutterBottom>
-              Currently Held Shares
+            <Typography variant="h6" component="h2" gutterBottom sx={styles.tableTitle}>
+              My Shares
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -193,10 +216,18 @@ export default function DashboardPage() {
                   {aggregatedPurchaseStocks.map((stock) => (
                     <TableRow
                       key={stock.ticker}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRowClick(stock.ticker);
+                      }}
+                      sx={styles.tableRow}
                     >
                       <TableCell align="left">
                         <IconButton
-                          onClick={() => handleRowClick(stock.ticker)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRowClick(stock.ticker);
+                          }}
                           color="primary"
                         >
                           <VisibilityIcon />
@@ -214,7 +245,7 @@ export default function DashboardPage() {
             </TableContainer>
 
             {/* Aggregated Sale Stocks Table */}
-            <Typography variant="h6" component="h2" gutterBottom>
+            <Typography variant="h6" component="h2" gutterBottom sx={styles.tableTitle}>
               Sold Shares
             </Typography>
             <TableContainer component={Paper}>
@@ -231,10 +262,18 @@ export default function DashboardPage() {
                   {aggregatedSaleStocks.map((stock) => (
                     <TableRow
                       key={stock.ticker}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRowClick(stock.ticker);
+                      }}
+                      sx={styles.tableRow}
                     >
                       <TableCell align="left">
                         <IconButton
-                          onClick={() => handleRowClick(stock.ticker)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRowClick(stock.ticker);
+                          }}
                           color="primary"
                         >
                           <VisibilityIcon />
@@ -257,6 +296,19 @@ export default function DashboardPage() {
                 </TableBody>
               </Table>
             </TableContainer>
+            <Modal
+        open={showPurchaseTradeForm}
+        onClose={togglePurchaseTradeForm}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={styles.modalStyle}>
+          <PurchaseTradeForm
+            onClose={togglePurchaseTradeForm}
+            onTradeAdded={fetchPurchaseTrades}
+          />
+        </Box>
+      </Modal>
           </>
         )}
       </Box>

@@ -14,10 +14,27 @@ export async function GET(req: NextRequest) {
 
     const userId = validationResp.id;
 
+    // Extract query parameters
+    const ticker = req.nextUrl.searchParams.get("ticker");
+
+    // Build the `where` clause dynamically
+    const whereClause: any = {
+      userId: userId,
+    };
+
+    if (ticker) {
+      whereClause.purchaseTrade = {
+        stock: {
+          ticker: {
+            contains: ticker,
+            mode: "insensitive",
+          },
+        },
+      };
+    }
+
     const saleTrades = await prisma.saleTrade.findMany({
-      where: {
-        userId: userId,
-      },
+      where: whereClause,
       include: {
         purchaseTrade: {
           include: {
@@ -54,7 +71,6 @@ export async function POST(req: NextRequest) {
       quantity,
       sellPrice,
       totalAmount,
-      buyPrice,
       netProfit,
       date,
       notes,
@@ -86,7 +102,6 @@ export async function POST(req: NextRequest) {
           quantity,
           sellPrice,
           totalAmount,
-          buyPrice,
           netProfit,
           date: new Date(date),
           notes,

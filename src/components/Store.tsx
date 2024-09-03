@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 export type UserContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
+  isLoadingUser: boolean;
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -17,6 +18,7 @@ type Props = {
 
 export default function Store({ children }: Props) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   useEffect(() => {
     fetchUser();
@@ -32,11 +34,13 @@ export default function Store({ children }: Props) {
       if(error.response.data.error === "Unauthorized") return
       console.error("Failed to fetch user data:", error);
       toast.error("Failed to fetch user data");
+    } finally {
+      setIsLoadingUser(false); 
     }
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, isLoadingUser }}>
       {children}
     </UserContext.Provider>
   );

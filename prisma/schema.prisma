@@ -49,7 +49,6 @@ model SaleTrade {
   quantity        Int
   sellPrice       Decimal       @db.Decimal(10, 2)
   totalAmount     Decimal       @db.Decimal(10, 2)
-  buyPrice        Decimal       @db.Decimal(10, 2)
   netProfit       Decimal       @db.Decimal(10, 2)
   date            DateTime
   notes           String?       @db.VarChar(255)

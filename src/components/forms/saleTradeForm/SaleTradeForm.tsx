@@ -50,7 +50,6 @@ import {
           quantity,
           sellPrice,
           totalAmount,
-          buyPrice: purchaseTrade.price,
           netProfit,
           date: date ? date.format("YYYY-MM-DD") : null,
           notes,

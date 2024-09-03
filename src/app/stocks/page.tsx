@@ -147,7 +147,7 @@ export default function StocksPage() {
             </TableContainer>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, px: 2 }}>
               <Typography>{`Displaying ${stocks.length} of ${totalPages * limit} records`}</Typography>
-              <Box>
+              {/* <Box>
                 <TextField
                   label="Go to page"
                   type="number"
@@ -158,7 +158,7 @@ export default function StocksPage() {
                   sx={{ marginRight: 2 }}
                 />
                 <Button variant="contained" onClick={handleDirectPageInput}>Go</Button>
-              </Box>
+              </Box> */}
               <Pagination count={totalPages} page={page} onChange={handlePageChange} color="primary" />
             </Box>
           </>
