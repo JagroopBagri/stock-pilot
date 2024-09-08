@@ -309,7 +309,7 @@ export default function StockDetailPage() {
               gutterBottom
               sx={styles.tableTitle}
             >
-              Sold Shares
+              Sold {ticker} Shares
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="sale trades table">
@@ -418,6 +418,7 @@ export default function StockDetailPage() {
                 : fetchPurchaseTrades
             }
             purchaseTrade={editPurchaseTrade}
+            setLoading={setLoading}
           />
         </Box>
       </Modal>

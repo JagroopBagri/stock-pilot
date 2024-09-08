@@ -279,6 +279,7 @@ export default function PurchasedSharesPage() {
           <PurchaseTradeForm
             onClose={togglePurchaseTradeForm}
             onTradeAdded={fetchPurchaseTrades}
+            setLoading={setLoading}
           />
         </Box>
       </Modal>
