@@ -1,6 +1,5 @@
 "use client";
 import { UserContext, UserContextType } from "@/components/Store";
-import SoldSharesTable from "@/components/tables/SoldSharesTable";
 import {
   Box,
   Button,
@@ -11,7 +10,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Typography
+  Typography,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Modal,
 } from "@mui/material";
 import {
   SaleTrade as PrismaSaleTrade,
@@ -21,6 +29,11 @@ import {
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import EditIcon from "@mui/icons-material/Edit";
+import SaleTradeForm from "@/components/forms/saleTradeForm/SaleTradeForm";
+import Decimal from "decimal.js";
+import { appColors } from "@/styles/appColors";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface SaleTrade extends PrismaSaleTrade {
   purchaseTrade: PurchaseTrade & {
@@ -28,12 +41,41 @@ interface SaleTrade extends PrismaSaleTrade {
   };
 }
 
+const modalStyle = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
+};
+
 export default function SoldSharesPage() {
   const [saleTrades, setSaleTrades] = useState<SaleTrade[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [tradeToDelete, setTradeToDelete] = useState<SaleTrade | null>(null);
   const { user } = useContext(UserContext) as UserContextType;
+  const [saleTradeToEdit, setSaleTradeToEdit] = useState<SaleTrade | null>(
+    null
+  );
+  const [selectedPurchaseTrade, setSelectedPurchaseTrade] =
+    useState<PurchaseTrade | null>(null);
+  const [showSaleTradeForm, setShowSaleTradeForm] = useState<boolean>(false);
+
+  const openEditSaleTradeForm = (saleTrade: SaleTrade) => {
+    setSelectedPurchaseTrade(saleTrade.purchaseTrade);
+    setSaleTradeToEdit(saleTrade);
+    setShowSaleTradeForm(true);
+  };
+
+  const closeSaleTradeForm = () => {
+    setSelectedPurchaseTrade(null);
+    setSaleTradeToEdit(null);
+    setShowSaleTradeForm(false);
+  };
 
   const openDeleteDialog = (trade: SaleTrade) => {
     setTradeToDelete(trade);
@@ -100,10 +142,66 @@ export default function SoldSharesPage() {
             <CircularProgress />
           </Box>
         ) : (
-          <SoldSharesTable
-            soldShares={saleTrades}
-            onDelete={openDeleteDialog}
-          />
+          <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="sold shares table">
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">Edit</TableCell>
+            <TableCell>Sale Date</TableCell>
+            <TableCell>Company Ticker</TableCell>
+            <TableCell align="center"># of Shares</TableCell>
+            <TableCell align="center">Sell Price</TableCell>
+            <TableCell align="center">Purchase Price</TableCell>
+            <TableCell align="center">Net Profit</TableCell>
+            <TableCell align="center">Delete</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {saleTrades.map((trade) => (
+            <TableRow
+              key={trade.id}
+              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+            >
+              <TableCell align="center">
+                <IconButton
+                  onClick={() => openEditSaleTradeForm(trade)}
+                  color="primary"
+                >
+                  <EditIcon />
+                </IconButton>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {new Date(trade.date).toLocaleDateString()}
+              </TableCell>
+              <TableCell>{trade.purchaseTrade.stock.ticker}</TableCell>
+              <TableCell align="center">{trade.quantity}</TableCell>
+              <TableCell align="center">
+                ${new Decimal(trade.sellPrice).toFixed(2)}
+              </TableCell>
+              <TableCell align="center">
+                ${new Decimal(trade.purchaseTrade.price).toFixed(2)}
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  color: new Decimal(trade.netProfit).greaterThanOrEqualTo(0)
+                    ? appColors.green
+                    : appColors.red,
+                  fontWeight: "bold",
+                }}
+              >
+                ${new Decimal(trade.netProfit).toFixed(2)}
+              </TableCell>
+              <TableCell align="center">
+                <IconButton onClick={() => openDeleteDialog(trade)} color="secondary">
+                  <DeleteIcon />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
         )}
       </Box>
       {/* Delete Confirmation Dialog */}
@@ -130,6 +228,26 @@ export default function SoldSharesPage() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Modal
+        open={showSaleTradeForm}
+        onClose={closeSaleTradeForm}
+        aria-labelledby="sale-trade-modal-title"
+        aria-describedby="sale-trade-modal-description"
+      >
+        <Box sx={modalStyle}>
+          {selectedPurchaseTrade && (
+            <SaleTradeForm
+              purchaseTrade={selectedPurchaseTrade}
+              onClose={closeSaleTradeForm}
+              onSaleTradeAdded={async () => {
+                await fetchSaleTrades();
+              }}
+              setLoading={setLoading}
+              saleTrade={saleTradeToEdit}
+            />
+          )}
+        </Box>
+      </Modal>
     </Container>
   );
 }
