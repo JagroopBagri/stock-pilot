@@ -178,7 +178,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" sx={{marginBottom: "1rem"}}>
           Add New Trade
         </Typography>
         <Grid container spacing={2}>

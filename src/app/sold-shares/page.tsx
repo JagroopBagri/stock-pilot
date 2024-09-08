@@ -34,6 +34,8 @@ import SaleTradeForm from "@/components/forms/saleTradeForm/SaleTradeForm";
 import Decimal from "decimal.js";
 import { appColors } from "@/styles/appColors";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useRouter } from "next/navigation";
 
 interface SaleTrade extends PrismaSaleTrade {
   purchaseTrade: PurchaseTrade & {
@@ -64,6 +66,7 @@ export default function SoldSharesPage() {
   const [selectedPurchaseTrade, setSelectedPurchaseTrade] =
     useState<PurchaseTrade | null>(null);
   const [showSaleTradeForm, setShowSaleTradeForm] = useState<boolean>(false);
+  const router = useRouter();
 
   const openEditSaleTradeForm = (saleTrade: SaleTrade) => {
     setSelectedPurchaseTrade(saleTrade.purchaseTrade);
@@ -121,6 +124,11 @@ export default function SoldSharesPage() {
     }
   };
 
+  const handleRowClick = (ticker: string) => {
+    // Navigate to the stock detail page
+    router.push(`/stocks/${ticker}`);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box>
@@ -143,65 +151,81 @@ export default function SoldSharesPage() {
           </Box>
         ) : (
           <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="sold shares table">
-        <TableHead>
-          <TableRow>
-            <TableCell align="center">Edit</TableCell>
-            <TableCell>Sale Date</TableCell>
-            <TableCell>Company Ticker</TableCell>
-            <TableCell align="center"># of Shares</TableCell>
-            <TableCell align="center">Sell Price</TableCell>
-            <TableCell align="center">Purchase Price</TableCell>
-            <TableCell align="center">Net Profit</TableCell>
-            <TableCell align="center">Delete</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {saleTrades.map((trade) => (
-            <TableRow
-              key={trade.id}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-              <TableCell align="center">
-                <IconButton
-                  onClick={() => openEditSaleTradeForm(trade)}
-                  color="primary"
-                >
-                  <EditIcon />
-                </IconButton>
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {new Date(trade.date).toLocaleDateString()}
-              </TableCell>
-              <TableCell>{trade.purchaseTrade.stock.ticker}</TableCell>
-              <TableCell align="center">{trade.quantity}</TableCell>
-              <TableCell align="center">
-                ${new Decimal(trade.sellPrice).toFixed(2)}
-              </TableCell>
-              <TableCell align="center">
-                ${new Decimal(trade.purchaseTrade.price).toFixed(2)}
-              </TableCell>
-              <TableCell
-                align="center"
-                sx={{
-                  color: new Decimal(trade.netProfit).greaterThanOrEqualTo(0)
-                    ? appColors.green
-                    : appColors.red,
-                  fontWeight: "bold",
-                }}
-              >
-                ${new Decimal(trade.netProfit).toFixed(2)}
-              </TableCell>
-              <TableCell align="center">
-                <IconButton onClick={() => openDeleteDialog(trade)} color="secondary">
-                  <DeleteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            <Table sx={{ minWidth: 650 }} aria-label="sold shares table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="left">View Company Details</TableCell>
+                  <TableCell align="left">Edit</TableCell>
+                  <TableCell>Sale Date</TableCell>
+                  <TableCell>Company Ticker</TableCell>
+                  <TableCell align="center"># of Shares</TableCell>
+                  <TableCell align="center">Sell Price</TableCell>
+                  <TableCell align="center">Purchase Price</TableCell>
+                  <TableCell align="center">Net Profit</TableCell>
+                  <TableCell align="center">Delete</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {saleTrades.map((trade) => (
+                  <TableRow
+                    key={trade.id}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell align="left">
+                      <IconButton
+                        onClick={() =>
+                          handleRowClick(trade.purchaseTrade.stock.ticker)
+                        }
+                        color="primary"
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell align="left">
+                      <IconButton
+                        onClick={() => openEditSaleTradeForm(trade)}
+                        color="primary"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {new Date(trade.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{trade.purchaseTrade.stock.ticker}</TableCell>
+                    <TableCell align="center">{trade.quantity}</TableCell>
+                    <TableCell align="center">
+                      ${new Decimal(trade.sellPrice).toFixed(2)}
+                    </TableCell>
+                    <TableCell align="center">
+                      ${new Decimal(trade.purchaseTrade.price).toFixed(2)}
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: new Decimal(
+                          trade.netProfit
+                        ).greaterThanOrEqualTo(0)
+                          ? appColors.green
+                          : appColors.red,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ${new Decimal(trade.netProfit).toFixed(2)}
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        onClick={() => openDeleteDialog(trade)}
+                        color="secondary"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Box>
       {/* Delete Confirmation Dialog */}
@@ -211,12 +235,11 @@ export default function SoldSharesPage() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">
-          Delete Sale Trade
-        </DialogTitle>
+        <DialogTitle id="alert-dialog-title">Delete Sale Trade</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this sale trade? This action cannot be undone.
+            Are you sure you want to delete this sale trade? This action cannot
+            be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

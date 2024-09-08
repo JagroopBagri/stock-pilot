@@ -188,8 +188,8 @@ export default function PurchasedSharesPage() {
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                  <TableCell align="center">Edit</TableCell>
                     <TableCell align="left">View Company Details</TableCell>
+                    <TableCell align="left">Edit</TableCell>
                     <TableCell>Purchase Date</TableCell>
                     <TableCell>Company Ticker</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
@@ -205,20 +205,20 @@ export default function PurchasedSharesPage() {
                       key={trade.id}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
-                      <TableCell align="center">
-                        <IconButton
-                          onClick={() => openEditPurchaseTradeForm(trade)}
-                          color="primary"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </TableCell>
                       <TableCell align="left">
                         <IconButton
                           onClick={() => handleRowClick(trade.stock.ticker)}
                           color="primary"
                         >
                           <VisibilityIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell align="left">
+                        <IconButton
+                          onClick={() => openEditPurchaseTradeForm(trade)}
+                          color="primary"
+                        >
+                          <EditIcon />
                         </IconButton>
                       </TableCell>
                       <TableCell component="th" scope="row">
