@@ -33,6 +33,7 @@ import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useRouter } from "next/navigation";
+import EditIcon from "@mui/icons-material/Edit";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
@@ -64,8 +65,15 @@ export default function PurchasedSharesPage() {
   const [tradeToDelete, setTradeToDelete] = useState<PurchaseTrade | null>(
     null
   );
+  const [editPurchaseTrade, setEditPurchaseTrade] =
+    useState<PurchaseTrade | null>(null);
   const { user } = useContext(UserContext) as UserContextType;
   const router = useRouter();
+
+  const openEditPurchaseTradeForm = (trade: PurchaseTrade) => {
+    setEditPurchaseTrade(trade);
+    setShowPurchaseTradeForm(true);
+  };
 
   const togglePurchaseTradeForm = () =>
     setShowPurchaseTradeForm(!showPurchaseTradeForm);
@@ -180,9 +188,10 @@ export default function PurchasedSharesPage() {
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <TableCell align="left">View Details</TableCell>
+                    <TableCell align="left">View Company Details</TableCell>
+                    <TableCell align="left">Edit</TableCell>
                     <TableCell>Purchase Date</TableCell>
-                    <TableCell>Stock</TableCell>
+                    <TableCell>Company Ticker</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Price per Share</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
@@ -202,6 +211,14 @@ export default function PurchasedSharesPage() {
                           color="primary"
                         >
                           <VisibilityIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell align="left">
+                        <IconButton
+                          onClick={() => openEditPurchaseTradeForm(trade)}
+                          color="primary"
+                        >
+                          <EditIcon />
                         </IconButton>
                       </TableCell>
                       <TableCell component="th" scope="row">
@@ -279,6 +296,8 @@ export default function PurchasedSharesPage() {
           <PurchaseTradeForm
             onClose={togglePurchaseTradeForm}
             onTradeAdded={fetchPurchaseTrades}
+            setLoading={setLoading}
+            purchaseTrade={editPurchaseTrade}
           />
         </Box>
       </Modal>

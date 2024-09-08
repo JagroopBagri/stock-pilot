@@ -15,7 +15,10 @@ import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
-import { PurchaseTrade as PrismaPurchaseTrade, Stock as PrismaStock } from "@prisma/client";
+import {
+  PurchaseTrade as PrismaPurchaseTrade,
+  Stock as PrismaStock,
+} from "@prisma/client";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: PrismaStock;
@@ -31,29 +34,37 @@ interface PurchaseTradeFormProps {
   onClose: () => void;
   onTradeAdded: () => Promise<void>;
   purchaseTrade?: PurchaseTrade | null;
+  setLoading: (val: boolean) => void;
 }
 
 const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   onClose,
   onTradeAdded,
   purchaseTrade,
+  setLoading
 }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
-  const [selectedStock, setSelectedStock] = useState<Stock | null>(purchaseTrade?.stock || null);
-  const [quantity, setQuantity] = useState<number | "">(purchaseTrade?.quantity || 0);
-  const [price, setPrice] = useState<string>(purchaseTrade?.price?.toString() || "");
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(
+    purchaseTrade?.stock || null
+  );
+  const [quantity, setQuantity] = useState<number | "">(
+    purchaseTrade?.quantity || 0
+  );
+  const [price, setPrice] = useState<string>(
+    purchaseTrade?.price?.toString() || ""
+  );
   const [date, setDate] = useState<Dayjs | null>(dayjs());
   const [notes, setNotes] = useState<string>(purchaseTrade?.notes || "");
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [autocompleteLoading, setAutocompleteLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [inputValue, setInputValue] = useState("");
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchStocks = async (newSearch?: string) => {
-    if ((!hasMore && !newSearch) || loading) return;
-    setLoading(true);
+    if ((!hasMore && !newSearch) || autocompleteLoading || purchaseTrade?.id) return;
+    setAutocompleteLoading(true);
     try {
       const searchToUse = newSearch !== undefined ? newSearch : searchTerm;
       const response = await axios.get<{
@@ -95,7 +106,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
       console.error("Failed to fetch stocks:", error);
       toast.error("Failed to fetch stocks");
     } finally {
-      setLoading(false);
+      setAutocompleteLoading(false);
     }
   };
 
@@ -111,6 +122,8 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setLoading(true);
+      onClose();
       const url = purchaseTrade
         ? `/api/v1/user/purchase-trade/${purchaseTrade.id}`
         : "/api/v1/user/purchase-trade";
@@ -128,12 +141,16 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
           notes,
         },
       });
-      toast.success(`Trade ${purchaseTrade ? "edited" : "added"} successfully`);
+      toast.success(`Trade ${purchaseTrade ? "updated" : "added"} successfully`);
       await onTradeAdded();
-      onClose();
     } catch (error) {
-      console.error(`Failed to ${purchaseTrade ? "edit" : "add"} trade:`, error);
+      console.error(
+        `Failed to ${purchaseTrade ? "edit" : "add"} trade:`,
+        error
+      );
       toast.error(`Failed to ${purchaseTrade ? "edit" : "add"} trade`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,12 +178,13 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" sx={{marginBottom: "1rem"}}>
           Add New Trade
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Autocomplete
+              disabled={!!purchaseTrade?.id}
               options={stocks}
               getOptionLabel={(option) =>
                 `${option.ticker} - ${option.companyName}`
@@ -174,14 +192,15 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  disabled={!!purchaseTrade?.id}
                   label="Stock"
                   required
-                  placeholder="Search by company name or ticker"
+                  placeholder="Type in company name or ticker"
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
                       <React.Fragment>
-                        {loading ? (
+                        {autocompleteLoading ? (
                           <CircularProgress color="inherit" size={20} />
                         ) : null}
                         {params.InputProps.endAdornment}
@@ -197,7 +216,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
               onInputChange={handleStockSearch}
               filterOptions={(x) => x}
               loadingText="Loading stocks..."
-              loading={loading}
+              loading={autocompleteLoading}
             />
           </Grid>
           <Grid item xs={12} sm={6}>

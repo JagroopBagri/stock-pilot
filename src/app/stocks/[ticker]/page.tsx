@@ -82,6 +82,9 @@ export default function StockDetailPage() {
   >(null);
   const [editPurchaseTrade, setEditPurchaseTrade] =
     useState<PurchaseTrade | null>(null);
+  const [saleTradeToEdit, setSaleTradeToEdit] = useState<SaleTrade | null>(
+    null
+  );
   const { ticker } = useParams();
 
   const openEditPurchaseTradeForm = (trade: PurchaseTrade) => {
@@ -175,6 +178,18 @@ export default function StockDetailPage() {
     }
   };
 
+  const openEditSaleTradeForm = (saleTrade: SaleTrade) => {
+    setSelectedPurchaseTrade(saleTrade.purchaseTrade);
+    setSaleTradeToEdit(saleTrade); 
+    setShowSaleTradeForm(true);
+  };
+
+  const closeSaleTradeForm = () => {
+    setSelectedPurchaseTrade(null);
+    setSaleTradeToEdit(null);
+    setShowSaleTradeForm(false);
+  }
+
   useEffect(() => {
     fetchPurchaseTrades();
     fetchSaleTrades();
@@ -249,7 +264,6 @@ export default function StockDetailPage() {
                     <TableCell align="center">Edit</TableCell>
                     <TableCell align="center">Sell Shares</TableCell>
                     <TableCell>Purchase Date</TableCell>
-                    <TableCell>Stock</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Price per Share</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
@@ -281,7 +295,6 @@ export default function StockDetailPage() {
                       <TableCell component="th" scope="row">
                         {new Date(trade.date).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{`${trade.stock.ticker}`}</TableCell>
                       <TableCell align="center">{trade.quantity}</TableCell>
                       <TableCell align="center">
                         ${new Decimal(trade.price).toFixed(2)}
@@ -309,14 +322,15 @@ export default function StockDetailPage() {
               gutterBottom
               sx={styles.tableTitle}
             >
-              Sold Shares
+              Sold {ticker} Shares
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="sale trades table">
                 <TableHead>
                   <TableRow>
+                    <TableCell align="center">Edit</TableCell>
+                    <TableCell>Purchase Date</TableCell>
                     <TableCell>Sale Date</TableCell>
-                    <TableCell>Stock</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Sell Price</TableCell>
                     <TableCell align="center">Purchase Price</TableCell>
@@ -330,10 +344,22 @@ export default function StockDetailPage() {
                       key={trade.id}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
+                      <TableCell align="center">
+                        <IconButton
+                          onClick={() => openEditSaleTradeForm(trade)}
+                          color="primary"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {new Date(
+                          trade.purchaseTrade.date
+                        ).toLocaleDateString()}
+                      </TableCell>
                       <TableCell component="th" scope="row">
                         {new Date(trade.date).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{`${trade.purchaseTrade.stock.ticker}`}</TableCell>
                       <TableCell align="center">{trade.quantity}</TableCell>
                       <TableCell align="center">
                         ${new Decimal(trade.sellPrice).toFixed(2)}
@@ -412,18 +438,19 @@ export default function StockDetailPage() {
             onTradeAdded={
               editPurchaseTrade
                 ? async () => {
-                  await fetchPurchaseTrades();
-                  await fetchSaleTrades();
-                }
+                    await fetchPurchaseTrades();
+                    await fetchSaleTrades();
+                  }
                 : fetchPurchaseTrades
             }
             purchaseTrade={editPurchaseTrade}
+            setLoading={setLoading}
           />
         </Box>
       </Modal>
       <Modal
         open={showSaleTradeForm}
-        onClose={() => setShowSaleTradeForm(false)}
+        onClose={closeSaleTradeForm}
         aria-labelledby="sale-trade-modal-title"
         aria-describedby="sale-trade-modal-description"
       >
@@ -431,12 +458,13 @@ export default function StockDetailPage() {
           {selectedPurchaseTrade && (
             <SaleTradeForm
               purchaseTrade={selectedPurchaseTrade}
-              onClose={() => setShowSaleTradeForm(false)}
+              onClose={closeSaleTradeForm}
               onSaleTradeAdded={async () => {
                 await fetchPurchaseTrades();
                 await fetchSaleTrades();
               }}
               setLoading={setLoading}
+              saleTrade={saleTradeToEdit}
             />
           )}
         </Box>
