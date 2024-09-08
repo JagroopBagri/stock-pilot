@@ -249,7 +249,6 @@ export default function StockDetailPage() {
                     <TableCell align="center">Edit</TableCell>
                     <TableCell align="center">Sell Shares</TableCell>
                     <TableCell>Purchase Date</TableCell>
-                    <TableCell>Stock</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Price per Share</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
@@ -281,7 +280,6 @@ export default function StockDetailPage() {
                       <TableCell component="th" scope="row">
                         {new Date(trade.date).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{`${trade.stock.ticker}`}</TableCell>
                       <TableCell align="center">{trade.quantity}</TableCell>
                       <TableCell align="center">
                         ${new Decimal(trade.price).toFixed(2)}
@@ -315,8 +313,8 @@ export default function StockDetailPage() {
               <Table sx={{ minWidth: 650 }} aria-label="sale trades table">
                 <TableHead>
                   <TableRow>
+                  <TableCell>Purchase Date</TableCell>
                     <TableCell>Sale Date</TableCell>
-                    <TableCell>Stock</TableCell>
                     <TableCell align="center"># of Shares</TableCell>
                     <TableCell align="center">Sell Price</TableCell>
                     <TableCell align="center">Purchase Price</TableCell>
@@ -331,9 +329,11 @@ export default function StockDetailPage() {
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
+                        {new Date(trade.purchaseTrade.date).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
                         {new Date(trade.date).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{`${trade.purchaseTrade.stock.ticker}`}</TableCell>
                       <TableCell align="center">{trade.quantity}</TableCell>
                       <TableCell align="center">
                         ${new Decimal(trade.sellPrice).toFixed(2)}

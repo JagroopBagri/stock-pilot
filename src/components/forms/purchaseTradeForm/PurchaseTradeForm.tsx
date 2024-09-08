@@ -195,7 +195,7 @@ const PurchaseTradeForm: React.FC<PurchaseTradeFormProps> = ({
                   disabled={!!purchaseTrade?.id}
                   label="Stock"
                   required
-                  placeholder="Search by company name or ticker"
+                  placeholder="Type in company name or ticker"
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (

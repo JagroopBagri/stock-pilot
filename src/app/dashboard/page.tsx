@@ -200,14 +200,14 @@ export default function DashboardPage() {
           <>
             {/* Aggregated Purchase Stocks Table */}
             <Typography variant="h6" component="h2" gutterBottom sx={styles.tableTitle}>
-              My Shares
+              Currently Held Shares per Company
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <TableCell align="left">View Details</TableCell>
-                    <TableCell align="left">Stock</TableCell>
+                    <TableCell align="left">View Company Details</TableCell>
+                    <TableCell align="left">Company Ticker</TableCell>
                     <TableCell align="center"># of Shares Held</TableCell>
                     <TableCell align="center">Total Spent</TableCell>
                   </TableRow>
@@ -246,14 +246,14 @@ export default function DashboardPage() {
 
             {/* Aggregated Sale Stocks Table */}
             <Typography variant="h6" component="h2" gutterBottom sx={styles.tableTitle}>
-              Sold Shares
+              Sold Shares per Company
             </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <TableCell align="left">View Details</TableCell>
-                    <TableCell align="left">Stock</TableCell>
+                    <TableCell align="left">View Company Details</TableCell>
+                    <TableCell align="left">Company Ticker</TableCell>
                     <TableCell align="center"># of Shares Sold</TableCell>
                     <TableCell align="center">Total Profit</TableCell>
                   </TableRow>
@@ -306,6 +306,7 @@ export default function DashboardPage() {
           <PurchaseTradeForm
             onClose={togglePurchaseTradeForm}
             onTradeAdded={fetchPurchaseTrades}
+            setLoading={setLoading}
           />
         </Box>
       </Modal>

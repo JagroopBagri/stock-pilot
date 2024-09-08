@@ -125,8 +125,8 @@ export default function StocksPage() {
               <Table sx={{ minWidth: 650 }} stickyHeader aria-label="stocks table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>View Details</TableCell>
-                    <TableCell>Stock</TableCell>
+                    <TableCell>View Company Details</TableCell>
+                    <TableCell>Company Ticker</TableCell>
                     <TableCell>Company Name</TableCell>
                   </TableRow>
                 </TableHead>

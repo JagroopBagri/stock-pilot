@@ -36,7 +36,7 @@ const SoldSharesTable: React.FC<SoldSharesTableProps> = ({
         <TableHead>
           <TableRow>
             <TableCell>Sale Date</TableCell>
-            <TableCell>Stock</TableCell>
+            <TableCell>Company Ticker</TableCell>
             <TableCell align="center"># of Shares</TableCell>
             <TableCell align="center">Sell Price</TableCell>
             <TableCell align="center">Purchase Price</TableCell>

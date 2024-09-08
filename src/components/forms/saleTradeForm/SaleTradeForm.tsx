@@ -33,6 +33,17 @@ import {
     const [sellPrice, setSellPrice] = useState<string>("");
     const [date, setDate] = useState<Dayjs | null>(dayjs());
     const [notes, setNotes] = useState<string>("");
+    const [dateError, setDateError] = useState<string | null>(null);
+
+  const handleDateChange = (newDate: Dayjs | null) => {
+    if (newDate && newDate.isBefore(dayjs(purchaseTrade.date))) {
+      setDateError("Date of sale cannot be before the purchase date.");
+      setDate(null);
+    } else {
+      setDateError(null);
+      setDate(newDate);
+    }
+  };
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -117,8 +128,8 @@ import {
               <DatePicker
                 label="Date of Sale"
                 value={date}
-                onChange={(newDate) => setDate(newDate)}
-                slotProps={{ textField: { fullWidth: true, required: true } }}
+                onChange={handleDateChange}
+                slotProps={{ textField: { fullWidth: true, required: true, error: Boolean(dateError), helperText: dateError || ""} }}
               />
             </Grid>
             <Grid item xs={12}>
