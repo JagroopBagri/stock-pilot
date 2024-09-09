@@ -28,6 +28,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Grid,
 } from "@mui/material";
 import axios from "axios";
 import Decimal from "decimal.js";
@@ -40,6 +41,7 @@ import { toast } from "react-hot-toast";
 import PurchaseTradeForm from "@/components/forms/purchaseTradeForm/PurchaseTradeForm";
 import SaleTradeForm from "@/components/forms/saleTradeForm/SaleTradeForm";
 import { appColors } from "@/styles/appColors";
+import { useTheme } from "@mui/material/styles";
 
 interface PurchaseTrade extends PrismaPurchaseTrade {
   stock: Stock;
@@ -48,6 +50,22 @@ interface PurchaseTrade extends PrismaPurchaseTrade {
 interface SaleTrade extends PrismaSaleTrade {
   purchaseTrade: PurchaseTrade;
 }
+
+interface CompanyDetails {
+  name: string;
+  description: string;
+  currentPrice: number;
+  priceChange: number;
+  lastUpdated: string;
+}
+
+const defaultCompanyDetails = {
+  name: "",
+  description: "",
+  currentPrice: 0,
+  priceChange: 0,
+  lastUpdated: "",
+};
 
 const modalStyle = {
   position: "absolute" as "absolute",
@@ -85,7 +103,14 @@ export default function StockDetailPage() {
   const [saleTradeToEdit, setSaleTradeToEdit] = useState<SaleTrade | null>(
     null
   );
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const { ticker } = useParams();
+  const [companyDetails, setCompanyDetails] = useState<CompanyDetails>(
+    defaultCompanyDetails
+  );
+
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const openEditPurchaseTradeForm = (trade: PurchaseTrade) => {
     setEditPurchaseTrade(trade);
@@ -147,6 +172,28 @@ export default function StockDetailPage() {
     }
   };
 
+  const fetchStockDetails = async () => {
+    setLoading(true);
+    try {
+      const resp = await axios.get(
+        `/api/v1/polygonio/tickerDetails?ticker=${ticker}`
+      );
+      const tickerDetails = resp.data.data;
+      setCompanyDetails({
+        name: tickerDetails?.name || "",
+        description: tickerDetails?.description || "No Description Provided",
+        currentPrice: 0,
+        priceChange: 0,
+        lastUpdated: "",
+      });
+    } catch (error) {
+      console.error("There was an error retrieving company details", error);
+      toast.error(`Failed to retrieve company details`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchPurchaseTrades = async () => {
     setLoading(true);
     try {
@@ -180,7 +227,7 @@ export default function StockDetailPage() {
 
   const openEditSaleTradeForm = (saleTrade: SaleTrade) => {
     setSelectedPurchaseTrade(saleTrade.purchaseTrade);
-    setSaleTradeToEdit(saleTrade); 
+    setSaleTradeToEdit(saleTrade);
     setShowSaleTradeForm(true);
   };
 
@@ -188,11 +235,19 @@ export default function StockDetailPage() {
     setSelectedPurchaseTrade(null);
     setSaleTradeToEdit(null);
     setShowSaleTradeForm(false);
-  }
+  };
+
+  const truncatedDescription = (description: string, maxLength: number) => {
+    if (description.length > maxLength) {
+      return description.slice(0, maxLength) + "...";
+    }
+    return description;
+  };
 
   useEffect(() => {
     fetchPurchaseTrades();
     fetchSaleTrades();
+    fetchStockDetails();
   }, [ticker]);
 
   return (
@@ -223,7 +278,7 @@ export default function StockDetailPage() {
           variant="h3"
           component="h1"
           sx={{
-            marginBottom: "3rem",
+            marginBottom: "1rem",
             fontWeight: "bold",
             textDecorationLine: "underline",
             textDecorationThickness: "2px",
@@ -232,13 +287,106 @@ export default function StockDetailPage() {
         >
           {ticker}
         </Typography>
+
+        {/* Company Details Section */}
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                p: 3,
+                backgroundColor: isDarkMode
+                  ? appColors.darkGrey
+                  : appColors.whiteSmoke,
+                borderRadius: "8px",
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                color: isDarkMode ? appColors.whiteSmoke : appColors.black,
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: "bold", mb: 1, textDecoration: "underline" }}
+              >
+                {companyDetails.name}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                {showFullDescription
+                  ? companyDetails.description
+                  : truncatedDescription(companyDetails.description, 300)}
+              </Typography>
+              {companyDetails.description.length > 300 && (
+                <Button
+                  onClick={() => {setShowFullDescription(!showFullDescription)}}
+                  variant="text"
+                  color="primary"
+                >
+                  {showFullDescription ? "Show Less" : "Read More"}
+                </Button>
+              )}
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                p: 3,
+                backgroundColor: isDarkMode
+                  ? appColors.charcoal
+                  : appColors.white,
+                borderRadius: "8px",
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                color: isDarkMode ? appColors.whiteSmoke : appColors.black,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{ fontStyle: "italic", color: appColors.grey, mb: 2 }}
+              >
+                Last Updated: {companyDetails.lastUpdated}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">Current Price:</Typography>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  ${companyDetails.currentPrice.toFixed(2)}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">Price Change (Today):</Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "bold",
+                    color:
+                      companyDetails.priceChange >= 0
+                        ? appColors.green
+                        : appColors.red,
+                  }}
+                >
+                  {companyDetails.priceChange >= 0 ? "+" : ""}
+                  {companyDetails.priceChange.toFixed(2)}%
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => {
             setShowPurchaseTradeForm(true);
           }}
-          sx={{ mb: 2 }}
+          sx={{ mt: 2 }}
         >
           Add Trade
         </Button>
