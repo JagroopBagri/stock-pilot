@@ -39,12 +39,6 @@ export const menuItems: MenuItem[] = [
       hide: ["logged-out"],
     }],
   },
-  {
-    name: "My Profile",
-    route: "/my-profile",
-    hide: ["logged-out"],
-    children: [],
-  },
   { name: "Sign Up", route: "/sign-up", hide: ["logged-in"] },
   { name: "Log In", route: "/login", hide: ["logged-in"] },
 ];

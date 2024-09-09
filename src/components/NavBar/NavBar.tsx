@@ -25,6 +25,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { appColors } from "@/styles/appColors";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 interface NavBarProps {
   toggleTheme: () => void;
@@ -36,9 +38,20 @@ function NavBar({ toggleTheme }: NavBarProps) {
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const { user, isLoadingUser } = useContext(UserContext) as UserContextType;
+  const { user, isLoadingUser, setUser } = useContext(UserContext) as UserContextType;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const logout = async () => {
+    try {
+      await axios.get("/api/v1/user/logout");
+      setUser(null);
+      router.push("/login");
+    } catch (error: any) {
+      console.error(error?.response?.data);
+      toast.error("Error occurred while attempting to logout");
+    }
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -241,6 +254,20 @@ function NavBar({ toggleTheme }: NavBarProps) {
           </Box>
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             {renderMenuItems(menuItems, false, 1)}
+            {user?.id && (
+              <Button
+                onClick={logout}
+                sx={{
+                  color:
+                    theme.palette.mode === "dark"
+                      ? appColors.whiteSmoke
+                      : appColors.black,
+                  marginX: "10px",
+                }}
+              >
+                Log Out
+              </Button>
+            )}
           </Box>
           <ToggleTheme toggleTheme={toggleTheme} />
         </Toolbar>
@@ -296,6 +323,21 @@ function NavBar({ toggleTheme }: NavBarProps) {
               </Typography>
             </Box>
             <List>{renderMenuItems(menuItems, true, 1)}</List>
+            {user?.id && (
+              <Button
+                onClick={logout}
+                sx={{
+                  margin: "0 16px 16px",
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? appColors.logoLightBlue
+                      : appColors.darkTurqoise,
+                  color: appColors.whiteSmoke,
+                }}
+              >
+                Log Out
+              </Button>
+            )}
           </div>
         </Drawer>
       </Box>
